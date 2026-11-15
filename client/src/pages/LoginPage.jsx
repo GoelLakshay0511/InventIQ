@@ -16,7 +16,7 @@ const C = {
 /* ── Reusable Input ─────────────────────────────────────────────────────── */
 function InputField({ id, label, type = 'text', placeholder, inputMode, autoComplete, value, onChange, hint, isPhone }) {
   const [focused, setFocused] = useState(false);
-  const [showPwd, setShowPwd] = useState(false);
+  const [showPwd, setShowPwd] = useState(false); // false = password hidden, true = password shown
   const isPwd = type === 'password';
   const resolvedType = isPwd ? (showPwd ? 'text' : 'password') : type;
 
@@ -48,6 +48,7 @@ function InputField({ id, label, type = 'text', placeholder, inputMode, autoComp
           placeholder={placeholder}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
+          className="iq-password-input"
           style={{
             width: '100%',
             padding: '.8125rem 1rem',
@@ -67,15 +68,29 @@ function InputField({ id, label, type = 'text', placeholder, inputMode, autoComp
         {isPwd && (
           <button
             type="button"
-            onClick={() => setShowPwd(v => !v)}
+            onClick={() => setShowPwd(prev => !prev)}
             aria-label={showPwd ? 'Hide password' : 'Show password'}
+            className="iq-eye-btn"
             style={{
               position: 'absolute', right: '.875rem', top: '50%', transform: 'translateY(-50%)',
               background: 'none', border: 'none', cursor: 'pointer', color: C.gray400,
-              fontSize: '1rem', lineHeight: 1, padding: 0
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '.25rem',
+              borderRadius: '.375rem', transition: 'color .2s', zIndex: 3
             }}
           >
-            {showPwd ? '🙈' : '👁️'}
+            {showPwd ? (
+              /* Eye Open Icon (Displayed when text is shown, click to hide) */
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            ) : (
+              /* Eye Off Icon (Displayed when text is hidden/dots, click to show) */
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+            )}
           </button>
         )}
       </div>
@@ -94,7 +109,6 @@ export default function LoginPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'phone') {
-      // Only permit numbers and max 10 digits
       const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
       setForm(p => ({ ...p, phone: digitsOnly }));
     } else {
@@ -150,6 +164,19 @@ export default function LoginPage() {
         .iq-submit:disabled { opacity: .65; cursor: not-allowed; }
         .iq-link:hover { color: ${C.green700} !important; text-decoration: underline; }
         .iq-ghost:hover { background: ${C.green50} !important; border-color: ${C.green600} !important; }
+        .iq-eye-btn:hover { color: ${C.gray700} !important; }
+
+        /* Hides the browser's built-in default password reveal buttons */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+          display: none !important;
+        }
+        input[type="password"]::-webkit-credentials-auto-fill-button {
+          visibility: hidden !important;
+          pointer-events: none !important;
+          position: absolute !important;
+          right: 0 !important;
+        }
       `}</style>
 
       {/* Full-page background */}
@@ -165,7 +192,7 @@ export default function LoginPage() {
         <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: `radial-gradient(circle, ${C.green600}22 0%, transparent 70%)`, top: -200, left: '50%', transform: 'translateX(-50%)' }} />
 
         {/* Card */}
-        <div className="iq-login-card" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 440, background: '#fff', borderRadius: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,.07), 0 24px 48px -12px rgba(0,0,0,.18)', border: `1px solid ${C.gray200}`, overflow: 'hidden' }}>
+        <div className="iq-login-card" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 440, background: '#fff', borderRadius: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,.07), 0 24px 48px -12px rgba(0,0,0,.18)', border: `1.5px solid ${C.gray200}`, overflow: 'hidden' }}>
 
           {/* Card top accent bar */}
           <div style={{ height: 4, background: `linear-gradient(90deg, ${C.green600}, ${C.green400}, #34d399)` }} />
