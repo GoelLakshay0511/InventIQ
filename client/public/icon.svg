@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="128" fill="#16a34a"/>
+  <text x="50%" y="54%" font-size="220" text-anchor="middle" dominant-baseline="central">📦</text>
+  <text x="50%" y="84%" font-size="52" font-family="system-ui, -apple-system, sans-serif" font-weight="900" fill="#ffffff" letter-spacing="4" text-anchor="middle">INVENTIQ</text>
+</svg>

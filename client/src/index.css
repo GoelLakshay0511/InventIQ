@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+  --color-primary-950: #052e16;
+}
+
+/* Universal Reset & Overscroll Elimination */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  min-height: 100%;
+  overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  min-height: 100%;
+  overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
+  @apply bg-gray-50 text-gray-900 font-sans antialiased;
+}
+
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Primary filled button — green brand color */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2
+         bg-primary-600 text-white font-semibold
+         px-4 py-2 rounded-lg
+         hover:bg-primary-700 active:bg-primary-800
+         focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+         disabled:opacity-50 disabled:cursor-not-allowed
+         transition-colors duration-150;
+}
+
+/* Outline button — green border, transparent fill */
+.btn-outline {
+  @apply inline-flex items-center justify-center gap-2
+         border-2 border-primary-600 text-primary-600 font-semibold
+         px-4 py-2 rounded-lg
+         hover:bg-primary-50 active:bg-primary-100
+         focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+         disabled:opacity-50 disabled:cursor-not-allowed
+         transition-colors duration-150;
+}
+
+/* Generic card — white surface with subtle shadow */
+.card {
+  @apply bg-white rounded-xl shadow-sm p-4 border border-gray-100;
+}
+
+/* Danger / destructive button */
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2
+         bg-red-600 text-white font-semibold
+         px-4 py-2 rounded-lg
+         hover:bg-red-700 active:bg-red-800
+         focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+         disabled:opacity-50 disabled:cursor-not-allowed
+         transition-colors duration-150;
+}

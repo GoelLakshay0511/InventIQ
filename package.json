@@ -1,0 +1,21 @@
+{
+  "name": "inventiq",
+  "version": "1.0.0",
+  "description": "Smart inventory restock predictions for kirana stores, powered by sales forecasting and WhatsApp automation.",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n \"server,client\" -c \"yellow,cyan\" \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:client": "npm run dev --workspace=client",
+    "seed": "npm run seed --workspace=server",
+    "build": "npm run build --workspace=client",
+    "install:all": "npm install && npm install --workspace=server && npm install --workspace=client"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
