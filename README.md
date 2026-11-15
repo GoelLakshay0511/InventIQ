@@ -136,28 +136,6 @@ inventiq/
 
 ---
 
-## 🌐 Deployment (Free)
-
-| Layer | Platform | Notes |
-|-------|----------|-------|
-| Frontend | [Vercel](https://vercel.com) | Free, global CDN, auto-deploy |
-| Backend | [Render](https://render.com) | Free 750 hrs/mo. Use [UptimeRobot](https://uptimerobot.com) to prevent cold starts |
-| Database | [MongoDB Atlas M0](https://www.mongodb.com/cloud/atlas) | Free 512MB |
-| Images | [Cloudinary](https://cloudinary.com) | Free 25GB |
-
-### Deploy to Render
-1. Push to GitHub
-2. Create a new **Web Service** on Render → connect repo
-3. Root directory: `server`, Build command: `npm install`, Start: `node server.js`
-4. Add all environment variables from `.env.example`
-
-### Deploy to Vercel
-1. Create a new **Project** on Vercel → connect repo
-2. Root directory: `client`
-3. Add env var: `VITE_API_BASE_URL=https://your-render-service.onrender.com/api`
-
----
-
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18 + Vite + Tailwind CSS + shadcn-style components
