@@ -8,6 +8,7 @@ import useAuthStore from './store/authStore';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
@@ -48,6 +49,7 @@ export default function App() {
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/login" element={<AuthRedirect><LoginPage /></AuthRedirect>} />
       <Route path="/register" element={<AuthRedirect><RegisterPage /></AuthRedirect>} />
+      <Route path="/forgot-password" element={<AuthRedirect><ForgotPasswordPage /></AuthRedirect>} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />

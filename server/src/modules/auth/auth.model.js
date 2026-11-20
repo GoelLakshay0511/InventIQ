@@ -10,6 +10,20 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Name is required'],
       trim: true,
     },
+    email: {
+      type: String,
+      // NOT required at schema level — old users don't have emails.
+      // Required is enforced at the application/service level for new registrations.
+      unique: true,
+      sparse: true,          // sparse: allows multiple null/undefined (old users)
+      lowercase: true,
+      trim: true,
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email address'],
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
     phone: {
       type: String,
       required: [true, 'Phone number is required'],

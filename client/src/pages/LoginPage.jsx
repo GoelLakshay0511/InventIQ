@@ -235,7 +235,7 @@ export default function LoginPage() {
               />
 
               {/* Remember me */}
-              <div style={{ display: 'flex', alignItems: 'center', marginTop: '-.25rem', fontSize: '.8125rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '-.25rem', fontSize: '.8125rem' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '.5rem', color: C.gray600, cursor: 'pointer', userSelect: 'none' }}>
                   <input
                     type="checkbox"
@@ -245,6 +245,13 @@ export default function LoginPage() {
                   />
                   Remember this device
                 </label>
+                <Link
+                  to="/forgot-password"
+                  style={{ color: C.green600, fontWeight: 600, textDecoration: 'none', fontSize: '.8125rem', transition: 'color .2s' }}
+                  className="iq-link"
+                >
+                  Forgot password?
+                </Link>
               </div>
 
               <button

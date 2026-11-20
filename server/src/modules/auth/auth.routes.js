@@ -14,8 +14,26 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Public routes (rate limited)
-router.post('/register', authLimiter, authController.register);
+// Stricter rate limiter for OTP endpoints to prevent abuse
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many OTP requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// ── New OTP-based registration flow ──────────────────────────────────────────
+router.post('/send-otp', otpLimiter, authController.sendOtp);
+router.post('/resend-otp', otpLimiter, authController.resendOtp);
+router.post('/verify-otp-register', authLimiter, authController.verifyOtpAndRegister);
+
+// ── Forgot / reset password ───────────────────────────────────────────────────
+router.post('/forgot-password', otpLimiter, authController.forgotPassword);
+router.post('/reset-password', authLimiter, authController.resetPassword);
+
+// ── Existing public routes ────────────────────────────────────────────────────
+router.post('/register', authLimiter, authController.register);  // legacy (seeder)
 router.post('/login', authLimiter, authController.login);
 
 // Semi-public: uses refresh token from cookie

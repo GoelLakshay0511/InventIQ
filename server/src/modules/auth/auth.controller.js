@@ -9,8 +9,65 @@ const REFRESH_COOKIE_OPTIONS = {
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
 };
 
+// ── NEW: OTP-based registration endpoints ─────────────────────────────────────
+
 /**
- * POST /api/auth/register
+ * POST /api/auth/send-otp
+ * Step 1: validate email/phone uniqueness and dispatch a 6-digit OTP.
+ */
+async function sendOtp(req, res, next) {
+  try {
+    const { email, phone, storeName } = req.body;
+    if (!email || !phone) return sendError(res, 'Email and phone are required', 400);
+    const result = await authService.sendRegistrationOtp({ email, phone, storeName });
+    return sendSuccess(res, result, result.message, 200);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/auth/resend-otp
+ * Resend OTP (subject to 60s cooldown enforced server-side).
+ */
+async function resendOtp(req, res, next) {
+  try {
+    const { email, storeName } = req.body;
+    if (!email) return sendError(res, 'Email is required', 400);
+    const result = await authService.resendRegistrationOtp({ email, storeName });
+    return sendSuccess(res, result, result.message, 200);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/auth/verify-otp-register
+ * Step 2: verify OTP, create account, and auto-login (returns tokens).
+ */
+async function verifyOtpAndRegister(req, res, next) {
+  try {
+    const { name, email, phone, storeName, pincode, password, otp } = req.body;
+
+    if (!name || !email || !phone || !storeName || !password || !otp) {
+      return sendError(res, 'All fields are required', 400);
+    }
+
+    const { accessToken, refreshToken, user } = await authService.verifyOtpAndRegister({
+      name, email, phone, storeName, pincode, password, otp,
+    });
+
+    res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
+    return sendSuccess(res, { accessToken, user }, 'Account created successfully!', 201);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ── EXISTING endpoints (unchanged) ────────────────────────────────────────────
+
+/**
+ * POST /api/auth/register  (legacy — kept for seeder / internal use)
  */
 async function register(req, res, next) {
   try {
@@ -23,16 +80,13 @@ async function register(req, res, next) {
 }
 
 /**
- * POST /api/auth/login
+ * POST /api/auth/login  — phone + password (unchanged, works for all users)
  */
 async function login(req, res, next) {
   try {
     const { phone, password } = req.body;
     const { accessToken, refreshToken, user } = await authService.loginUser({ phone, password });
-
-    // Set refresh token as HttpOnly cookie — not accessible via JS
     res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
-
     return sendSuccess(res, { accessToken, user }, 'Login successful');
   } catch (err) {
     next(err);
@@ -41,7 +95,6 @@ async function login(req, res, next) {
 
 /**
  * POST /api/auth/refresh
- * Reads refresh token from cookie or body (cookie preferred).
  */
 async function refresh(req, res, next) {
   try {
@@ -55,7 +108,6 @@ async function refresh(req, res, next) {
 
 /**
  * POST /api/auth/logout
- * Requires valid access token (user must be authenticated to log out).
  */
 async function logout(req, res, next) {
   try {
@@ -69,27 +121,24 @@ async function logout(req, res, next) {
 
 /**
  * GET /api/auth/me
- * Returns the authenticated user's public profile.
  */
 async function getMe(req, res, next) {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return sendError(res, 'User not found', 404);
-    return sendSuccess(
-      res,
-      {
-        user: {
-          id: user._id,
-          name: user.name,
-          phone: user.phone,
-          storeName: user.storeName,
-          pincode: user.pincode,
-          settings: user.settings,
-          createdAt: user.createdAt,
-        },
+    return sendSuccess(res, {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        storeName: user.storeName,
+        pincode: user.pincode,
+        isEmailVerified: user.isEmailVerified ?? false,
+        settings: user.settings,
+        createdAt: user.createdAt,
       },
-      'User profile'
-    );
+    }, 'User profile');
   } catch (err) {
     next(err);
   }
@@ -97,7 +146,6 @@ async function getMe(req, res, next) {
 
 /**
  * PUT /api/auth/me
- * Update store profile & settings
  */
 async function updateMe(req, res, next) {
   try {
@@ -111,7 +159,6 @@ async function updateMe(req, res, next) {
 
 /**
  * PUT /api/auth/change-password
- * Verify old password and set new password
  */
 async function changePassword(req, res, next) {
   try {
@@ -123,7 +170,60 @@ async function changePassword(req, res, next) {
   }
 }
 
+// ── Forgot Password endpoints ─────────────────────────────────────────────────
+
+/**
+ * POST /api/auth/forgot-password
+ * Find account by phone, send OTP to their email.
+ * If the account has no email (legacy user), returns needsEmail: true
+ * so the frontend can display an email input field.
+ */
+async function forgotPassword(req, res, next) {
+  try {
+    const { phone, email } = req.body;
+    if (!phone) return sendError(res, 'Phone number is required', 400);
+
+    const result = await authService.sendPasswordResetOtp({ phone, email });
+    return sendSuccess(res, result, 'Verification code sent to your email.');
+  } catch (err) {
+    // Special case: legacy account has no email — tell frontend to show email field
+    if (err.needsEmail) {
+      return res.status(422).json({
+        success: false,
+        message: err.message,
+        needsEmail: true,
+      });
+    }
+    next(err);
+  }
+}
+
+/**
+ * POST /api/auth/reset-password
+ * Verify OTP and set a new password.
+ */
+async function resetPassword(req, res, next) {
+  try {
+    const { phone, otp, newPassword } = req.body;
+    if (!phone || !otp || !newPassword) {
+      return sendError(res, 'Phone, verification code, and new password are required', 400);
+    }
+    const result = await authService.resetPasswordWithOtp({ phone, otp, newPassword });
+    return sendSuccess(res, result, result.message);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
+  // New OTP flow
+  sendOtp,
+  resendOtp,
+  verifyOtpAndRegister,
+  // Forgot password
+  forgotPassword,
+  resetPassword,
+  // Existing
   register,
   login,
   refresh,
