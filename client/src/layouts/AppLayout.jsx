@@ -13,7 +13,7 @@ import apiClient from '../api/client';
 import toast from 'react-hot-toast';
 
 const navItems = [
-  { to: '/dashboard',       label: 'Dashboard',    Icon: LayoutDashboard },
+  { to: '/dashboard',       label: 'Dashboard',   Icon: LayoutDashboard },
   { to: '/sales/quick-tap', label: 'Daily Sales',  Icon: ShoppingCart },
   { to: '/products',        label: 'Products',     Icon: Package },
   { to: '/reorder',         label: 'Reorder',      Icon: RefreshCw },
@@ -23,10 +23,10 @@ const navItems = [
 
 /** Shared active-link class factory for desktop sidebar */
 const linkClass = ({ isActive }) =>
-  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+  `flex items-center gap-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
     isActive
-      ? 'bg-primary-600 text-white'
-      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+      ? 'bg-primary-50 text-primary-700 font-semibold px-3 border-l-4 border-primary-600'
+      : 'text-gray-500 hover:bg-gray-50/80 hover:text-gray-800 px-3 border-l-4 border-transparent'
   }`;
 
 export default function AppLayout() {
@@ -46,21 +46,29 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* ── Desktop sidebar (hidden on mobile) ──────────────────────────── */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-30">
-        {/* Logo — Discreetly links to landing page without any visible giveaway */}
-        <Link to="/landing" className="block px-5 py-5 border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+    <div className="flex min-h-screen" style={{ backgroundColor: '#F6F8FA' }}>
+
+      {/* ── Desktop sidebar ────────────────────────────────────────── */}
+      <aside
+        className="hidden md:flex flex-col w-64 fixed inset-y-0 left-0 z-30 glass"
+        style={{ borderRight: '1px solid rgba(226,232,240,0.7)' }}
+      >
+        {/* Logo */}
+        <Link
+          to="/landing"
+          className="block px-5 py-5 hover:bg-gray-50/50 transition-colors"
+          style={{ borderBottom: '1px solid rgba(226,232,240,0.6)' }}
+        >
           <h1 className="text-xl font-bold text-primary-600 tracking-tight">
             InventIQ 📦
           </h1>
           {user?.storeName && (
-            <p className="text-xs text-gray-400 mt-0.5 truncate">{user.storeName}</p>
+            <p className="text-xs text-gray-400 mt-0.5 truncate font-medium">{user.storeName}</p>
           )}
         </Link>
 
         {/* Navigation links */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scroll-thin">
           {navItems.map(({ to, label, Icon }) => (
             <NavLink key={to} to={to} className={linkClass} end={to === '/dashboard'}>
               <Icon size={18} />
@@ -70,10 +78,11 @@ export default function AppLayout() {
         </nav>
 
         {/* Logout button pinned to bottom */}
-        <div className="px-3 pb-5 border-t border-gray-100 pt-3">
+        <div className="px-3 pb-5 pt-3" style={{ borderTop: '1px solid rgba(226,232,240,0.6)' }}>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150"
+            style={{ minHeight: '44px' }}
           >
             <LogOut size={18} />
             <span>Logout</span>
@@ -81,10 +90,14 @@ export default function AppLayout() {
         </div>
       </aside>
 
-      {/* ── Main content area ───────────────────────────────────────────── */}
+      {/* ── Main content area ───────────────────────────────────────── */}
       <main className="flex-1 md:ml-64 pb-20 md:pb-0">
-        {/* Top bar visible on mobile only */}
-        <header className="md:hidden sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-between">
+
+        {/* Mobile top bar */}
+        <header
+          className="md:hidden sticky top-0 z-20 glass px-4 py-2.5 flex items-center justify-between"
+          style={{ borderBottom: '1px solid rgba(226,232,240,0.7)' }}
+        >
           <Link to="/landing" className="flex items-center gap-2">
             <span className="text-xl">📦</span>
             <div>
@@ -97,7 +110,6 @@ export default function AppLayout() {
             </div>
           </Link>
 
-          {/* Quick-action buttons on mobile top bar */}
           <div className="flex items-center gap-1">
             <NavLink
               to="/settings"
@@ -127,8 +139,11 @@ export default function AppLayout() {
         </div>
       </main>
 
-      {/* ── Mobile bottom navigation bar ─────────────────────────────────── */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 flex items-center justify-around py-1 shadow-lg">
+      {/* ── Mobile bottom nav ───────────────────────────────────────── */}
+      <nav
+        className="md:hidden fixed bottom-0 inset-x-0 z-30 glass flex items-center justify-around py-1"
+        style={{ borderTop: '1px solid rgba(226,232,240,0.7)', boxShadow: '0 -4px 16px rgba(0,0,0,0.06)' }}
+      >
         {navItems.map(({ to, label, Icon }) => (
           <NavLink
             key={to}
@@ -139,6 +154,7 @@ export default function AppLayout() {
                 isActive ? 'text-primary-600 font-semibold' : 'text-gray-400 hover:text-gray-600 font-medium'
               }`
             }
+            style={{ minHeight: '44px' }}
           >
             <Icon size={19} />
             <span className="text-[10px] mt-0.5 tracking-tight">{label}</span>

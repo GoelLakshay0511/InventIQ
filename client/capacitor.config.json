@@ -1,0 +1,8 @@
+{
+  "appId": "com.inventiq.store",
+  "appName": "InventIQ",
+  "webDir": "dist",
+  "server": {
+    "cleartext": true
+  }
+}

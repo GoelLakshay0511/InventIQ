@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">InventIQ</string>
+    <string name="title_activity_main">InventIQ</string>
+    <string name="package_name">com.inventiq.store</string>
+    <string name="custom_url_scheme">com.inventiq.store</string>
+</resources>
