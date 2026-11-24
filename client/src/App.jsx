@@ -41,11 +41,18 @@ function AuthRedirect({ children }) {
   return children;
 }
 
+/** Root route — if user is logged in, immediately open Dashboard */
+function RootRoute() {
+  const accessToken = useAuthStore((s) => s.accessToken);
+  if (accessToken) return <Navigate to="/dashboard" replace />;
+  return <LandingPage />;
+}
+
 export default function App() {
   return (
     <Routes>
       {/* ── Public routes ─────────────────────────────────────────────── */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<RootRoute />} />
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/login" element={<AuthRedirect><LoginPage /></AuthRedirect>} />
       <Route path="/register" element={<AuthRedirect><RegisterPage /></AuthRedirect>} />

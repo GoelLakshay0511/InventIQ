@@ -46,7 +46,7 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: '#F6F8FA' }}>
+    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden" style={{ backgroundColor: '#F6F8FA' }}>
 
       {/* ── Desktop sidebar ────────────────────────────────────────── */}
       <aside
@@ -91,7 +91,7 @@ export default function AppLayout() {
       </aside>
 
       {/* ── Main content area ───────────────────────────────────────── */}
-      <main className="flex-1 md:ml-64 pb-20 md:pb-0">
+      <main className="flex-1 md:ml-64 pb-32 md:pb-8 w-full max-w-full overflow-x-hidden">
 
         {/* Mobile top bar */}
         <header
@@ -134,15 +134,23 @@ export default function AppLayout() {
         </header>
 
         {/* Page content */}
-        <div className="p-4 md:p-6 max-w-7xl mx-auto">
+        <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto w-full">
           <Outlet />
         </div>
       </main>
 
-      {/* ── Mobile bottom nav ───────────────────────────────────────── */}
+      {/* ── Mobile bottom nav (Fixed & elevated above cards) ────────── */}
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-30 glass flex items-center justify-around py-1"
-        style={{ borderTop: '1px solid rgba(226,232,240,0.7)', boxShadow: '0 -4px 16px rgba(0,0,0,0.06)' }}
+        className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-md flex items-center justify-around px-1 pt-1.5 pb-2.5 sm:pb-3 border-t border-gray-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: '100%',
+          zIndex: 50,
+          paddingBottom: 'max(10px, env(safe-area-inset-bottom, 10px))',
+        }}
       >
         {navItems.map(({ to, label, Icon }) => (
           <NavLink
@@ -150,14 +158,21 @@ export default function AppLayout() {
             to={to}
             end={to === '/dashboard'}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-1.5 transition-colors ${
-                isActive ? 'text-primary-600 font-semibold' : 'text-gray-400 hover:text-gray-600 font-medium'
+              `flex-1 flex flex-col items-center justify-center py-1 transition-colors outline-none focus:outline-none focus-visible:outline-none active:bg-transparent select-none ${
+                isActive ? 'text-primary-600 font-bold' : 'text-gray-400 hover:text-gray-600 font-medium'
               }`
             }
-            style={{ minHeight: '44px' }}
           >
-            <Icon size={19} />
-            <span className="text-[10px] mt-0.5 tracking-tight">{label}</span>
+            {({ isActive }) => (
+              <>
+                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-primary-50 text-primary-600' : ''}`}>
+                  <Icon size={19} className="shrink-0" />
+                </div>
+                <span className="text-[10px] leading-tight mt-0.5 tracking-tight text-center truncate max-w-full">
+                  {label}
+                </span>
+              </>
+            )}
           </NavLink>
         ))}
       </nav>

@@ -70,18 +70,19 @@ function DashboardSkeleton() {
 }
 
 /** Small stat card used in the top stats row */
-function StatCard({ icon: Icon, label, value, color = 'text-gray-700', iconBg = 'bg-gray-100/80', to }) {
+function StatCard({ icon: Icon, label, shortLabel, value, color = 'text-gray-700', iconBg = 'bg-gray-100/80', to }) {
   const content = (
-    <div className={`card card-interactive flex items-center gap-4 ${to ? 'cursor-pointer' : ''}`}>
-      <div className={`p-3 rounded-2xl ${iconBg} shrink-0`}>
-        <Icon size={22} className={color} />
+    <div className={`card card-interactive flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 ${to ? 'cursor-pointer' : ''}`}>
+      <div className={`p-2 sm:p-2.5 rounded-xl ${iconBg} shrink-0`}>
+        <Icon size={18} className={color} />
       </div>
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 truncate leading-tight">
-          {label}
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-tight text-gray-400 leading-tight">
+          <span className="sm:hidden">{shortLabel || label}</span>
+          <span className="hidden sm:inline">{label}</span>
         </p>
-        <p className={`text-3xl font-black mt-0.5 nums leading-none ${color}`}>
-          {value ?? '—'}
+        <p className={`text-xl sm:text-2xl font-black mt-0.5 nums leading-none ${color}`}>
+          {value ?? '0'}
         </p>
       </div>
     </div>
@@ -239,135 +240,142 @@ export default function DashboardPage() {
     <div className="space-y-6">
 
       {/* ── Page header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3 fade-up fade-up-d0">
+      <div className="flex items-center justify-between flex-wrap gap-2.5 fade-up fade-up-d0">
         <div>
-          <h2 className="text-2xl font-black text-gray-900 tracking-tight">Dashboard</h2>
-          <p className="text-sm text-gray-400 mt-0.5 font-medium">Real-time inventory intelligence for your store</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Dashboard</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5 font-normal">Real-time inventory intelligence for your store</p>
         </div>
         <button
           onClick={generateForecast}
           disabled={generatingForecast}
-          className="btn-primary"
+          className="btn-primary text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4 font-semibold"
         >
-          <RefreshCw size={16} className={generatingForecast ? 'animate-spin' : ''} />
-          {generatingForecast ? 'Analyzing Trends…' : 'Generate New Forecast'}
+          <RefreshCw size={15} className={generatingForecast ? 'animate-spin' : ''} />
+          <span className="hidden sm:inline">{generatingForecast ? 'Analyzing Trends…' : 'Generate New Forecast'}</span>
+          <span className="sm:hidden">{generatingForecast ? 'Analyzing…' : 'New Forecast'}</span>
         </button>
       </div>
 
       {/* ── Stats row ───────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <div className="fade-up fade-up-d1">
-          <StatCard icon={Package}       label="Total Products"    value={totalProducts}  iconBg="bg-blue-50"   color="text-blue-600"     to="/products" />
+          <StatCard icon={Package}       label="Total Products"    shortLabel="Products"     value={totalProducts}  iconBg="bg-blue-50"   color="text-blue-600"     to="/products" />
         </div>
         <div className="fade-up fade-up-d2">
-          <StatCard icon={TrendingUp}    label="Top Sellers"       value={topSellers}     iconBg="bg-green-50"  color="text-primary-600"  to="/products" />
+          <StatCard icon={TrendingUp}    label="Top Sellers"       shortLabel="Top Sellers"  value={topSellers}     iconBg="bg-green-50"  color="text-primary-600"  to="/products" />
         </div>
         <div className="fade-up fade-up-d3">
-          <StatCard icon={AlertTriangle} label="Items to Reorder"  value={itemsToReorder} iconBg="bg-orange-50" color="text-orange-500"   to="/reorder" />
+          <StatCard icon={AlertTriangle} label="Items to Reorder"  shortLabel="To Reorder"   value={itemsToReorder} iconBg="bg-orange-50" color="text-orange-500"   to="/reorder" />
         </div>
         <div className="fade-up fade-up-d4">
-          <StatCard icon={Archive}       label="Critical Stockouts" value={criticalItems}  iconBg="bg-red-50"    color="text-red-500"      to="/reorder" />
+          <StatCard icon={Archive}       label="Critical Stockouts" shortLabel="Out of Stock" value={criticalItems}  iconBg="bg-red-50"    color="text-red-500"      to="/reorder" />
         </div>
       </div>
 
       {/* ── Quick Store Operations Hub ───────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 fade-up fade-up-d3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3 fade-up fade-up-d3">
 
         <Link
           to="/sales/quick-tap"
-          className="card card-interactive p-3.5 flex items-center justify-between group"
+          className="card card-interactive p-3 sm:p-3.5 flex items-center justify-between group"
           style={{ borderColor: 'rgba(226,232,240,0.9)' }}
         >
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-150">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="p-2 sm:p-2.5 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-150 shrink-0">
               <ShoppingCart size={18} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-gray-800">Log Daily Sales</h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">1-Tap Counter &amp; Voice Input</p>
+              <h4 className="text-xs sm:text-sm font-bold text-gray-800 leading-tight">Log Daily Sales</h4>
+              <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">1-Tap Counter &amp; Voice Input</p>
             </div>
           </div>
-          <span className="text-gray-400 group-hover:text-emerald-600 text-xs font-semibold flex items-center gap-1 transition-colors duration-150">
+          <span className="text-gray-400 group-hover:text-emerald-600 text-xs font-semibold flex items-center gap-1 transition-colors duration-150 shrink-0">
             Open <span className="arrow-slide"><ArrowRight size={13} /></span>
           </span>
         </Link>
 
         <Link
           to="/reorder"
-          className="card card-interactive p-3.5 flex items-center justify-between group"
+          className="card card-interactive p-3 sm:p-3.5 flex items-center justify-between group"
           style={{ borderColor: 'rgba(226,232,240,0.9)' }}
         >
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-green-50 text-green-600 rounded-xl group-hover:bg-green-600 group-hover:text-white transition-all duration-150">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="p-2 sm:p-2.5 bg-green-50 text-green-600 rounded-xl group-hover:bg-green-600 group-hover:text-white transition-all duration-150 shrink-0">
               <MessageCircle size={18} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-gray-800">WhatsApp POs</h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">1-Tap purchase orders to suppliers</p>
+              <h4 className="text-xs sm:text-sm font-bold text-gray-800 leading-tight">WhatsApp POs</h4>
+              <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">1-Tap purchase orders to suppliers</p>
             </div>
           </div>
-          <span className="text-gray-400 group-hover:text-green-600 text-xs font-semibold flex items-center gap-1 transition-colors duration-150">
+          <span className="text-gray-400 group-hover:text-green-600 text-xs font-semibold flex items-center gap-1 transition-colors duration-150 shrink-0">
             Send <span className="arrow-slide"><ArrowRight size={13} /></span>
           </span>
         </Link>
 
         <Link
           to="/distributors"
-          className="card card-interactive p-3.5 flex items-center justify-between group"
+          className="card card-interactive p-3 sm:p-3.5 flex items-center justify-between group"
           style={{ borderColor: 'rgba(226,232,240,0.9)' }}
         >
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all duration-150">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="p-2 sm:p-2.5 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all duration-150 shrink-0">
               <Truck size={18} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-gray-800">Suppliers Directory</h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">Delivery days &amp; minimum orders</p>
+              <h4 className="text-xs sm:text-sm font-bold text-gray-800 leading-tight">Suppliers Directory</h4>
+              <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">Delivery days &amp; minimum orders</p>
             </div>
           </div>
-          <span className="text-gray-400 group-hover:text-blue-600 text-xs font-semibold flex items-center gap-1 transition-colors duration-150">
+          <span className="text-gray-400 group-hover:text-blue-600 text-xs font-semibold flex items-center gap-1 transition-colors duration-150 shrink-0">
             View <span className="arrow-slide"><ArrowRight size={13} /></span>
           </span>
         </Link>
       </div>
 
-      {/* ── Trapped Working Capital Alert Banner ─────────────────────────────── */}
+      {/* ── Trapped Working Capital Alert Banner (Compact & tailored for mobile) ─ */}
       {safeDeadStock?.totalTrappedCapital > 0 && (
         <div
-          className="rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 fade-up fade-up-d4"
+          className="rounded-2xl p-3 sm:p-4 flex items-center justify-between gap-3 fade-up fade-up-d4 transition-all"
           style={{
-            background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a22 100%)',
-            border: '1px solid #fcd34d',
-            boxShadow: '0 2px 12px rgba(217,119,6,0.12)',
+            background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+            border: '1px solid #fde68a',
+            boxShadow: '0 2px 10px rgba(217,119,6,0.08)',
           }}
         >
-          <div className="flex items-start sm:items-center gap-4">
-            <div className="p-3 rounded-2xl shrink-0" style={{ background: '#fde68a', color: '#92400e' }}>
-              <Coins size={24} />
+          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+            <div className="p-2 sm:p-2.5 rounded-xl shrink-0" style={{ background: '#fde68a', color: '#92400e' }}>
+              <Coins size={18} />
             </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-black text-amber-900 text-xl nums">
-                  ₹{(safeDeadStock.totalTrappedCapital || 0).toLocaleString('en-IN')} Trapped in Dead Stock
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-extrabold text-amber-950 text-sm sm:text-base nums leading-tight truncate">
+                  ₹{(safeDeadStock.totalTrappedCapital || 0).toLocaleString('en-IN')} Dead Stock
                 </span>
                 <span
-                  className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                  className="text-[10px] font-bold px-1.5 py-0.2 rounded-full shrink-0"
                   style={{ background: '#fcd34d', color: '#78350f' }}
                 >
-                  {safeDeadStock.count || 0} slow-movers
+                  {safeDeadStock.count || 0} slow items
                 </span>
               </div>
-              <p className="text-xs text-amber-800 mt-1 leading-relaxed font-medium">
-                Items sitting idle for 30+ days. Stop reordering to free up liquidity for high-turnover FMCG goods.
+              <p className="text-[11px] text-amber-800/90 truncate mt-0.5 hidden sm:block">
+                Items sitting idle for 30+ days. Stop reordering to free up working capital.
+              </p>
+              <p className="text-[10px] text-amber-800/90 truncate mt-0.5 sm:hidden">
+                Tap to see slow-moving capital breakdown
               </p>
             </div>
           </div>
+
           <button
+            type="button"
             onClick={() => setShowDeadStockModal(true)}
-            className="btn-outline text-xs whitespace-nowrap self-start sm:self-auto shrink-0"
-            style={{ borderColor: '#d97706', color: '#92400e' }}
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold shrink-0 border transition-all active:scale-95 whitespace-nowrap"
+            style={{ background: '#ffffff', borderColor: '#d97706', color: '#92400e' }}
           >
-            View Capital Breakdown →
+            <span className="sm:hidden">View →</span>
+            <span className="hidden sm:inline">View Breakdown →</span>
           </button>
         </div>
       )}
@@ -475,21 +483,22 @@ export default function DashboardPage() {
           </div>
 
           {safeSuggestions.length > 0 && (
-            <div className="pt-3 mt-3 border-t border-gray-100 flex items-center justify-between">
-              <span className="text-xs text-gray-500">
+            <div className="pt-3 mt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+              <span className="text-xs text-gray-500 truncate">
                 {criticalItems > 0 ? (
                   <span className="text-red-600 font-semibold nums">
                     {criticalItems} critical item{criticalItems !== 1 ? 's' : ''}
                   </span>
                 ) : (
-                  <span className="nums">{safeSuggestions.length} items need replenishment</span>
+                  <span className="nums">{safeSuggestions.length} items to reorder</span>
                 )}
               </span>
               <Link
                 to="/reorder"
-                className="text-xs bg-primary-50 text-primary-700 hover:bg-primary-100 font-semibold px-3 py-1.5 rounded-lg border border-primary-200 transition-colors"
+                className="text-xs bg-primary-50 text-primary-700 hover:bg-primary-100 font-semibold px-2.5 py-1.5 sm:px-3 rounded-lg border border-primary-200 transition-colors shrink-0"
               >
-                Review &amp; Send WhatsApp Order →
+                <span className="sm:hidden">Send POs →</span>
+                <span className="hidden sm:inline">Review &amp; Send WhatsApp Order →</span>
               </Link>
             </div>
           )}
@@ -508,21 +517,21 @@ export default function DashboardPage() {
             style={{ borderRadius: '20px', boxShadow: '0 24px 64px rgba(0,0,0,0.20)' }}
           >
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl" style={{ background: '#fde68a', color: '#92400e' }}>
-                  <ShieldAlert size={20} />
+            <div className="flex items-center justify-between px-4 py-3.5 sm:px-6 sm:py-4" style={{ borderBottom: '1px solid #f1f5f9' }}>
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="p-2 rounded-xl shrink-0" style={{ background: '#fde68a', color: '#92400e' }}>
+                  <ShieldAlert size={18} />
                 </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 text-lg">Dead Working Capital Analysis</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-gray-900 text-base sm:text-lg leading-tight truncate">Dead Capital Analysis</h3>
+                  <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate">
                     ₹{(safeDeadStock?.totalTrappedCapital || 0).toLocaleString('en-IN')} locked in {safeDeadStock?.count || 0} slow-moving products
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowDeadStockModal(false)}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0 ml-2"
                 aria-label="Close"
               >
                 <X size={20} />
@@ -530,7 +539,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Modal body */}
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-4">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>

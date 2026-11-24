@@ -139,27 +139,28 @@ export default function ReorderPage() {
   return (
     <div className="space-y-5">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-2.5">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Reorder Suggestions</h2>
-          <p className="text-sm text-gray-500">
-            {suggestions.length} item{suggestions.length !== 1 ? 's' : ''} calculated based on sales forecast & safety buffers
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Reorder Suggestions</h2>
+          <p className="text-xs md:text-sm text-gray-500 mt-0.5 font-normal">
+            {suggestions.length} item{suggestions.length !== 1 ? 's' : ''} needing restock
           </p>
         </div>
         <button
           onClick={() => setShowOcrModal(true)}
-          className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-sm transition"
+          className="btn-outline flex items-center gap-1.5 text-xs py-2 px-3 font-semibold bg-white"
         >
-          <Camera size={16} />
-          Scan Delivery Invoice (OCR)
+          <Camera size={15} className="text-primary-600" />
+          <span className="hidden sm:inline">Scan Delivery Invoice</span>
+          <span className="sm:hidden">Scan Bill</span>
         </button>
       </div>
 
       {/* ── Urgency legend ──────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-xs text-gray-400 font-medium mr-1">Urgency Levels:</span>
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scroll-thin">
+        <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider shrink-0 mr-1">Urgency:</span>
         {Object.entries(URGENCY).map(([key, cfg]) => (
-          <span key={key} className={`text-xs px-2.5 py-1 rounded-full border font-medium ${cfg.classes}`}>
+          <span key={key} className={`text-[11px] px-2.5 py-0.5 rounded-full border font-bold shrink-0 ${cfg.classes}`}>
             {cfg.label}
           </span>
         ))}
@@ -189,74 +190,82 @@ export default function ReorderPage() {
           return (
             <div key={group.distributorId} className="card space-y-4">
               {/* Distributor header */}
-              <div className="flex items-start justify-between flex-wrap gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-bold text-gray-800 text-base flex items-center gap-2">
-                    <Truck size={18} className="text-primary-600" />
-                    {group.distributorName}
+                  <h3 className="font-bold text-gray-900 text-base flex items-center gap-2">
+                    <Truck size={18} className="text-primary-600 shrink-0" />
+                    <span>{group.distributorName}</span>
                   </h3>
                   {group.distributorPhone && (
-                    <p className="text-xs text-gray-400 mt-0.5">📞 {group.distributorPhone}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 font-medium flex items-center gap-1">
+                      <span>📞</span> {group.distributorPhone}
+                    </p>
                   )}
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {group.items.length} item{group.items.length !== 1 ? 's' : ''} to restock · Est. Order: <strong>₹{totalOrderEst.toLocaleString('en-IN')}</strong>
+                  <p className="text-xs text-gray-500 mt-1">
+                    <span className="font-semibold text-gray-700">{group.items.length} item{group.items.length !== 1 ? 's' : ''} to restock</span>
+                    {' · '}
+                    <span>Est. Order: <strong className="text-gray-900 font-bold">₹{totalOrderEst.toLocaleString('en-IN')}</strong></span>
                   </p>
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => handleSendWhatsApp(group)}
                     disabled={sendWhatsApp.isPending}
-                    className="btn-primary text-xs py-2 px-3 shadow-xs"
+                    className="btn-primary text-xs py-2.5 px-3.5 shadow-xs flex items-center justify-center gap-1.5 w-full sm:w-auto font-bold"
                   >
-                    <MessageCircle size={15} />
-                    Send WhatsApp Order
+                    <MessageCircle size={16} />
+                    <span>Send WhatsApp Order</span>
                   </button>
-                  <button
-                    onClick={() => markOrdered.mutate(group.distributorId)}
-                    disabled={markOrdered.isPending}
-                    className="btn-outline text-xs py-2 px-3"
-                  >
-                    <CheckCheck size={15} />
-                    Mark as Ordered
-                  </button>
-                  <button
-                    onClick={() => restockGroup.mutate(group)}
-                    disabled={restockGroup.isPending}
-                    className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs py-2 px-3 rounded-lg transition"
-                    title="Increment inventory stock with ordered quantities"
-                  >
-                    <PackageCheck size={15} />
-                    {restockGroup.isPending ? 'Restocking...' : 'Mark Delivered & Restock (+Stock)'}
-                  </button>
+                  <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => markOrdered.mutate(group.distributorId)}
+                      disabled={markOrdered.isPending}
+                      className="btn-outline text-xs py-2 px-2.5 flex items-center justify-center gap-1 font-semibold"
+                    >
+                      <CheckCheck size={14} />
+                      <span className="truncate">Mark Ordered</span>
+                    </button>
+                    <button
+                      onClick={() => restockGroup.mutate(group)}
+                      disabled={restockGroup.isPending}
+                      className="flex items-center justify-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs py-2 px-2.5 rounded-lg transition"
+                      title="Increment inventory stock with ordered quantities"
+                    >
+                      <PackageCheck size={14} />
+                      <span className="truncate">{restockGroup.isPending ? 'Restocking...' : 'Restock (+Stock)'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Wholesale Minimum Order Value (MOV) Optimizer Banner */}
               {mov > 0 && (
                 <div
-                  className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
+                  className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
                     isMovMet
-                      ? 'bg-green-50/80 border-green-200 text-green-900'
+                      ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900'
                       : 'bg-amber-50/90 border-amber-200 text-amber-900'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start sm:items-center gap-2">
                     {isMovMet ? (
-                      <ShieldCheck size={16} className="text-green-600 shrink-0" />
+                      <ShieldCheck size={18} className="text-emerald-600 shrink-0 mt-0.5 sm:mt-0" />
                     ) : (
-                      <AlertCircle size={16} className="text-amber-600 shrink-0" />
+                      <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5 sm:mt-0" />
                     )}
                     <div>
-                      <span className="font-bold">
-                        {isMovMet
-                          ? 'Free Wholesale Delivery Qualified! 🎉'
-                          : `₹${difference.toLocaleString('en-IN')} away from Free Delivery`}
-                      </span>
-                      <span className="text-gray-500 ml-1.5">
-                        (Order: ₹{totalOrderEst.toLocaleString('en-IN')} · Free Delivery Threshold: ₹{mov.toLocaleString('en-IN')})
-                      </span>
+                      <div className="font-bold flex items-center gap-1 flex-wrap">
+                        <span>
+                          {isMovMet
+                            ? 'Free Wholesale Delivery Qualified! 🎉'
+                            : `₹${difference.toLocaleString('en-IN')} away from Free Delivery`}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-gray-600 mt-0.5">
+                        Order: ₹{totalOrderEst.toLocaleString('en-IN')} · Free Delivery Threshold: ₹{mov.toLocaleString('en-IN')}
+                      </div>
                     </div>
                   </div>
 
@@ -268,8 +277,8 @@ export default function ReorderPage() {
                 </div>
               )}
 
-              {/* Items table */}
-              <div className="overflow-x-auto">
+              {/* ── Desktop Items Table (Hidden on Mobile) ────────────────────────── */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase">
@@ -316,6 +325,57 @@ export default function ReorderPage() {
                     })}
                   </tbody>
                 </table>
+              </div>
+
+              {/* ── Mobile Native Cards List (Visible only on Mobile) ───────────────── */}
+              <div className="md:hidden space-y-2.5">
+                {group.items.map((item) => {
+                  const itemTotal = (item.suggestedOrderQty || 0) * (item.costPrice || 0);
+                  const cartons =
+                    item.suggestedCartons ||
+                    Math.ceil((item.suggestedOrderQty || 1) / (item.packSize || 1));
+
+                  return (
+                    <div
+                      key={item.productId ?? item._id}
+                      className="p-3 bg-gray-50/70 hover:bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-2"
+                    >
+                      {/* Top row: Title & Urgency */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="font-bold text-gray-900 text-sm leading-tight">
+                          {item.productName}
+                        </div>
+                        <UrgencyBadge level={item.urgency} />
+                      </div>
+
+                      {/* Middle row: Stock & Order Details */}
+                      <div className="grid grid-cols-2 gap-2 text-xs bg-white p-2.5 rounded-lg border border-gray-100/80">
+                        <div>
+                          <div className="text-[10px] uppercase font-semibold text-gray-400">Current Stock</div>
+                          <div className="font-bold text-red-600 mt-0.5">
+                            {item.currentStock} <span className="font-normal text-gray-500">{item.unit || ''}</span>
+                          </div>
+                          <div className="text-[10px] text-gray-400 mt-0.5">
+                            Reorder at {item.reorderPoint} {item.unit || ''}
+                          </div>
+                        </div>
+
+                        <div className="border-l border-gray-100 pl-2">
+                          <div className="text-[10px] uppercase font-semibold text-primary-700">Suggested Order</div>
+                          <div className="font-extrabold text-primary-900 mt-0.5">
+                            +{item.suggestedOrderQty || item.suggestedQty || '—'} {item.unit || ''}
+                            <span className="text-[11px] font-normal text-gray-500 ml-1">
+                              ({cartons} ctn)
+                            </span>
+                          </div>
+                          <div className="text-[11px] font-bold text-gray-700 mt-0.5">
+                            Est: {itemTotal > 0 ? `₹${itemTotal.toLocaleString('en-IN')}` : '—'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );

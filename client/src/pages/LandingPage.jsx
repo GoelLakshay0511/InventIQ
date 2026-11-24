@@ -137,29 +137,41 @@ function injectStyles() {
     .iq-nav.scrolled .iq-hamburger-bar { background:${C.gray700} !important; }
 
     @media (max-width:768px) {
+      .iq-nav         { padding: .5rem 0 !important; }
       .iq-nav-links   { display:none !important; }
       .iq-hamburger   { display:flex !important; }
       .iq-nav-links.open { display:flex !important; flex-direction:column; position:absolute; top:100%; left:0; right:0; background:rgba(21,128,61,.97); padding:1rem 1.5rem 1.5rem; gap:.75rem; }
-      .iq-hero-grid   { grid-template-columns:1fr !important; }
+      .iq-nav-cta-btn { padding: .4rem .85rem !important; font-size: .75rem !important; border-radius: .5rem !important; }
+      .iq-nav-cta-text { display: none !important; }
+      .iq-section     { padding: 2.75rem 0 !important; }
+      .iq-section-header { margin-bottom: 2rem !important; }
+      .iq-heading-lg  { font-size: 1.6rem !important; line-height: 1.25 !important; margin-bottom: .75rem !important; }
+      .iq-heading-md  { font-size: 1.35rem !important; line-height: 1.3 !important; margin-bottom: .6rem !important; }
+      .iq-subtext     { font-size: .875rem !important; line-height: 1.6 !important; margin-bottom: 1.5rem !important; }
+      .iq-hero-grid   { grid-template-columns:1fr !important; padding-top: 4.25rem !important; gap: 2rem !important; }
       .iq-phone-wrap  { order:-1; }
-      .iq-feat-grid   { grid-template-columns:1fr !important; }
+      .iq-feat-grid   { grid-template-columns:1fr !important; gap: 1rem !important; }
+      .iq-feat-card   { padding: 1.25rem !important; border-radius: 1rem !important; }
       .iq-steps-line  { display:none !important; }
-      .iq-steps-grid  { grid-template-columns:repeat(2,1fr) !important; }
-      .iq-alerts-grid { grid-template-columns:1fr !important; }
-      .iq-forecast-grid { grid-template-columns:1fr !important; }
+      .iq-steps-grid  { grid-template-columns:repeat(2,1fr) !important; gap: 1rem !important; }
+      .iq-step-num    { width: 44px !important; height: 44px !important; font-size: 1.05rem !important; }
+      .iq-alerts-grid { grid-template-columns:1fr !important; gap: 2rem !important; }
+      .iq-forecast-grid { grid-template-columns:1fr !important; gap: 2rem !important; }
       .iq-tech-grid   { grid-template-columns:repeat(2,1fr) !important; }
       .iq-deploy-grid { grid-template-columns:repeat(2,1fr) !important; }
       .iq-footer-grid { grid-template-columns:1fr !important; gap:2rem !important; }
       .iq-hero-phone  { width:220px !important; }
       .iq-fb1 { right:-4% !important; }
       .iq-fb2 { left:-4% !important; }
+      .iq-scroll-top-btn { width: 38px !important; height: 38px !important; bottom: 1.25rem !important; right: 1.25rem !important; }
     }
     @media (max-width:480px) {
-      .iq-hero-actions { flex-direction:column !important; }
-      .iq-hero-actions a { width:100% !important; }
-      .iq-cta-actions { flex-direction:column !important; align-items:center; }
-      .iq-cta-actions a { width:100% !important; max-width:320px; }
+      .iq-hero-actions { flex-direction:column !important; gap: .6rem !important; }
+      .iq-hero-actions a { width:100% !important; padding: .75rem 1.25rem !important; font-size: .875rem !important; }
+      .iq-cta-actions { flex-direction:column !important; align-items:center; gap: .6rem !important; }
+      .iq-cta-actions a { width:100% !important; max-width:320px; padding: .75rem 1.25rem !important; font-size: .875rem !important; }
       .iq-deploy-grid { grid-template-columns:1fr !important; }
+      .iq-steps-grid { grid-template-columns: 1fr !important; }
     }
   `;
   document.head.appendChild(el);
@@ -281,17 +293,17 @@ export default function LandingPage() {
             </ul>
             {/* CTA */}
             {isLoggedIn ? (
-              <Link to="/dashboard" className="iq-btn-primary"
+              <Link to="/dashboard" className="iq-btn-primary iq-nav-cta-btn"
                 style={{ ...btnPrimary, padding:'.55rem 1.4rem', fontSize:'.9rem', display:'inline-flex', alignItems:'center', gap:'.45rem' }}>
-                Go to Dashboard →
+                <span className="iq-nav-cta-text">Go to </span>Dashboard →
               </Link>
             ) : (
-              <div style={{ display:'flex', gap:'.75rem', alignItems:'center' }}>
-                <Link to="/login" className="iq-btn-outline iq-nav-cta"
+              <div className="iq-nav-cta-wrapper" style={{ display:'flex', gap:'.75rem', alignItems:'center' }}>
+                <Link to="/login" className="iq-btn-outline iq-nav-cta iq-nav-cta-btn"
                   style={{ ...btnOutline, padding:'.5rem 1.25rem', fontSize:'.875rem', color:'rgba(255,255,255,.9)', borderColor:'rgba(255,255,255,.5)', background:'rgba(255,255,255,.1)' }}>
                   Login
                 </Link>
-                <Link to="/register" className="iq-btn-primary"
+                <Link to="/register" className="iq-btn-primary iq-nav-cta-btn"
                   style={{ ...btnPrimary, padding:'.5rem 1.25rem', fontSize:'.875rem' }}>
                   Get Started
                 </Link>
@@ -325,11 +337,11 @@ export default function LandingPage() {
                 <span className="iq-pulse" style={{ width:6, height:6, background:C.green400, borderRadius:'50%', display:'inline-block' }} />
                 Smart Kirana Inventory · AI-Powered
               </div>
-              <h1 style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(2.5rem,5vw,3.75rem)', fontWeight:900, color:'#fff', lineHeight:1.1, letterSpacing:'-.02em', marginBottom:'1.5rem' }}>
+              <h1 className="iq-heading-lg" style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(2.5rem,5vw,3.75rem)', fontWeight:900, color:'#fff', lineHeight:1.1, letterSpacing:'-.02em', marginBottom:'1.5rem' }}>
                 Never Run Out of<br />
                 <span style={{ background:'linear-gradient(135deg,#4ade80,#a7f3d0)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>Stock Again</span>
               </h1>
-              <p style={{ fontSize:'1.125rem', color:'rgba(255,255,255,.8)', lineHeight:1.7, marginBottom:'2.5rem', maxWidth:520 }}>
+              <p className="iq-subtext" style={{ fontSize:'1.125rem', color:'rgba(255,255,255,.8)', lineHeight:1.7, marginBottom:'2.5rem', maxWidth:520 }}>
                 InventIQ gives neighborhood kirana store owners AI-powered forecasting, color-coded reorder alerts, and 1-tap WhatsApp ordering.
               </p>
               <div className="iq-hero-actions" style={{ display:'flex', gap:'1rem', flexWrap:'wrap', marginBottom:'3rem' }}>
@@ -443,14 +455,14 @@ export default function LandingPage() {
 
 
       {/* ── FEATURES ────────────────────────────────────────────────────── */}
-      <section id="features" style={{ padding:'6rem 0', background:'#fff' }}>
+      <section id="features" className="iq-section" style={{ padding:'6rem 0', background:'#fff' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem' }}>
-          <div className="iq-fade-up" style={{ textAlign:'center', maxWidth:640, margin:'0 auto 4rem' }}>
+          <div className="iq-fade-up iq-section-header" style={{ textAlign:'center', maxWidth:640, margin:'0 auto 4rem' }}>
             <SectionTag>✨ Core Features</SectionTag>
-            <h2 style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(1.875rem,4vw,2.75rem)', fontWeight:800, color:C.gray900, lineHeight:1.2, letterSpacing:'-.02em', marginBottom:'1rem' }}>
+            <h2 className="iq-heading-md" style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(1.875rem,4vw,2.75rem)', fontWeight:800, color:C.gray900, lineHeight:1.2, letterSpacing:'-.02em', marginBottom:'1rem' }}>
               Everything your kirana <span style={{ color:C.green600 }}>store needs</span>
             </h2>
-            <p style={{ color:C.gray500, fontSize:'1.0625rem', lineHeight:1.7 }}>A complete inventory management suite designed specifically for neighborhood kirana stores — fast, simple, and free to run.</p>
+            <p className="iq-subtext" style={{ color:C.gray500, fontSize:'1.0625rem', lineHeight:1.7 }}>A complete inventory management suite designed specifically for neighborhood kirana stores — fast, simple, and free to run.</p>
           </div>
           <div className="iq-feat-grid" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1.5rem' }}>
             {[
@@ -473,14 +485,14 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ────────────────────────────────────────────────── */}
-      <section id="how-it-works" style={{ padding:'6rem 0', background:`linear-gradient(180deg,${C.gray50} 0%,#fff 100%)` }}>
+      <section id="how-it-works" className="iq-section" style={{ padding:'6rem 0', background:`linear-gradient(180deg,${C.gray50} 0%,#fff 100%)` }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem' }}>
-          <div className="iq-fade-up" style={{ textAlign:'center', maxWidth:640, margin:'0 auto 4rem' }}>
+          <div className="iq-fade-up iq-section-header" style={{ textAlign:'center', maxWidth:640, margin:'0 auto 4rem' }}>
             <SectionTag>🗺️ Process</SectionTag>
-            <h2 style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(1.875rem,4vw,2.75rem)', fontWeight:800, color:C.gray900, lineHeight:1.2, letterSpacing:'-.02em', marginBottom:'1rem' }}>
+            <h2 className="iq-heading-md" style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(1.875rem,4vw,2.75rem)', fontWeight:800, color:C.gray900, lineHeight:1.2, letterSpacing:'-.02em', marginBottom:'1rem' }}>
               Up and running in <span style={{ color:C.green600 }}>4 simple steps</span>
             </h2>
-            <p style={{ color:C.gray500, fontSize:'1.0625rem', lineHeight:1.7 }}>Designed to be set up once and then get out of your way.</p>
+            <p className="iq-subtext" style={{ color:C.gray500, fontSize:'1.0625rem', lineHeight:1.7 }}>Designed to be set up once and then get out of your way.</p>
           </div>
           <div className="iq-steps-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'2rem', position:'relative' }}>
             <div className="iq-steps-line" style={{ position:'absolute', top:28, left:'calc(12.5% + 28px)', right:'calc(12.5% + 28px)', height:2, background:`linear-gradient(90deg,${C.green200},${C.green400},${C.green200})` }} />
@@ -501,7 +513,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── ALERTS DEMO ─────────────────────────────────────────────────── */}
-      <section id="alerts-demo" style={{ padding:'6rem 0', background:'#fff' }}>
+      <section id="alerts-demo" className="iq-section" style={{ padding:'6rem 0', background:'#fff' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem' }}>
           <div className="iq-alerts-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'5rem', alignItems:'center' }}>
             {/* Mockup */}
@@ -535,7 +547,7 @@ export default function LandingPage() {
             {/* Copy */}
             <div className="iq-fade-up iq-d2">
               <SectionTag>🔴 Smart Alerts</SectionTag>
-              <h2 style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(1.875rem,4vw,2.5rem)', fontWeight:800, color:C.gray900, lineHeight:1.2, letterSpacing:'-.02em', marginBottom:'1rem' }}>
+              <h2 className="iq-heading-md" style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(1.875rem,4vw,2.5rem)', fontWeight:800, color:C.gray900, lineHeight:1.2, letterSpacing:'-.02em', marginBottom:'1rem' }}>
                 Know <span style={{ color:C.green600 }}>exactly</span> what<br />to order, and when
               </h2>
               <p style={{ color:C.gray500, fontSize:'1.0625rem', lineHeight:1.7, marginBottom:'1.75rem' }}>
@@ -560,12 +572,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── FORECASTING ENGINE ──────────────────────────────────────────── */}
-      <section id="forecasting" style={{ padding:'6rem 0', background:`linear-gradient(135deg,${C.green950} 0%,${C.green900} 100%)`, position:'relative', overflow:'hidden' }}>
+      <section id="forecasting" className="iq-section" style={{ padding:'6rem 0', background:`linear-gradient(135deg,${C.green950} 0%,${C.green900} 100%)`, position:'relative', overflow:'hidden' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem' }}>
           <div className="iq-forecast-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'5rem', alignItems:'center' }}>
             <div className="iq-fade-up">
               <SectionTagDark>🧠 Under the Hood</SectionTagDark>
-              <h2 style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(1.875rem,4vw,2.5rem)', fontWeight:800, color:'#fff', lineHeight:1.2, letterSpacing:'-.02em', marginBottom:'.75rem' }}>
+              <h2 className="iq-heading-md" style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(1.875rem,4vw,2.5rem)', fontWeight:800, color:'#fff', lineHeight:1.2, letterSpacing:'-.02em', marginBottom:'.75rem' }}>
                 The Forecasting<br />Engine Explained
               </h2>
               <p style={{ color:'rgba(255,255,255,.65)', fontSize:'1.0625rem', lineHeight:1.7, marginBottom:'2rem' }}>
@@ -596,14 +608,14 @@ export default function LandingPage() {
 
 
       {/* ── CTA ─────────────────────────────────────────────────────────── */}
-      <section id="cta" style={{ padding:'6rem 0', background:`linear-gradient(135deg,${C.green700} 0%,${C.green600} 50%,#34d399 100%)`, position:'relative', overflow:'hidden' }}>
+      <section id="cta" className="iq-section" style={{ padding:'6rem 0', background:`linear-gradient(135deg,${C.green700} 0%,${C.green600} 50%,#34d399 100%)`, position:'relative', overflow:'hidden' }}>
         <div style={{ position:'absolute', width:600, height:600, borderRadius:'50%', background:'rgba(255,255,255,.06)', top:-200, right:-200 }} />
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.5rem', position:'relative', zIndex:1 }}>
           <div className="iq-fade-up" style={{ textAlign:'center' }}>
-            <h2 style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(2rem,5vw,3.25rem)', fontWeight:900, color:'#fff', lineHeight:1.15, letterSpacing:'-.02em', marginBottom:'1.25rem' }}>
+            <h2 className="iq-heading-lg" style={{ fontFamily:"'Outfit',sans-serif", fontSize:'clamp(2rem,5vw,3.25rem)', fontWeight:900, color:'#fff', lineHeight:1.15, letterSpacing:'-.02em', marginBottom:'1.25rem' }}>
               Ready to take control<br />of your inventory?
             </h2>
-            <p style={{ fontSize:'1.125rem', color:'rgba(255,255,255,.8)', maxWidth:520, margin:'0 auto 2.5rem', lineHeight:1.7 }}>
+            <p className="iq-subtext" style={{ fontSize:'1.125rem', color:'rgba(255,255,255,.8)', maxWidth:520, margin:'0 auto 2.5rem', lineHeight:1.7 }}>
               Set up in minutes, runs free forever. Never run out of stock again.
             </p>
             <div className="iq-cta-actions" style={{ display:'flex', gap:'1rem', justifyContent:'center', flexWrap:'wrap' }}>
