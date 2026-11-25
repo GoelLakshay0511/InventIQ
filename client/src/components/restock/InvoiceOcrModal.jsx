@@ -59,6 +59,7 @@ export default function InvoiceOcrModal({ isOpen, onClose }) {
       qc.invalidateQueries({ queryKey: ['products-all'] });
       qc.invalidateQueries({ queryKey: ['top-sellers'] });
       qc.invalidateQueries({ queryKey: ['reorder-suggestions'] });
+      qc.invalidateQueries({ queryKey: ['distributors'] });
       handleClose();
     },
     onError: (err) => {

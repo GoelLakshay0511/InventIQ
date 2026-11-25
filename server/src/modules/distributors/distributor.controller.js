@@ -49,4 +49,47 @@ async function deleteDistributor(req, res, next) {
   }
 }
 
-module.exports = { getDistributors, createDistributor, updateDistributor, deleteDistributor };
+/**
+ * POST /api/distributors/:id/delivery
+ * Record wholesale delivery turnaround time and update reliability scorecard.
+ */
+async function recordDelivery(req, res, next) {
+  try {
+    const distributor = await distributorService.recordDeliveryTurnaround(
+      req.user.id,
+      req.params.id,
+      req.body
+    );
+    return sendSuccess(
+      res,
+      { distributor },
+      `Delivery recorded! Lead time updated to ${distributor.effectiveLeadTime} days (${distributor.onTimeRate}% on-time).`
+    );
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/distributors/:id/reset-reliability
+ */
+async function resetReliability(req, res, next) {
+  try {
+    const distributor = await distributorService.resetReliabilityScorecard(
+      req.user.id,
+      req.params.id
+    );
+    return sendSuccess(res, { distributor }, 'Scorecard reset to default promised lead time');
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = {
+  getDistributors,
+  createDistributor,
+  updateDistributor,
+  deleteDistributor,
+  recordDelivery,
+  resetReliability,
+};

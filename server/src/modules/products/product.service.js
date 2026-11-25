@@ -1,4 +1,5 @@
 const Product = require('./product.model');
+const Distributor = require('../distributors/distributor.model');
 const SalesLog = require('../sales/sales.model');
 const mongoose = require('mongoose');
 

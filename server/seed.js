@@ -47,6 +47,14 @@ const DISTRIBUTORS = [
     phone: '9123456789',
     minimumOrderValue: 5000,
     deliveryDays: 2,
+    effectiveLeadTime: 3.9,
+    onTimeRate: 25,
+    delayBufferDays: 1.9,
+    deliveryHistory: [
+      { orderDate: new Date(Date.now() - 25 * 86400000), deliveredDate: new Date(Date.now() - 21 * 86400000), turnaroundDays: 4.0, promisedDays: 2, onTime: false, note: 'Delayed wholesale shipment' },
+      { orderDate: new Date(Date.now() - 16 * 86400000), deliveredDate: new Date(Date.now() - 12 * 86400000), turnaroundDays: 3.8, promisedDays: 2, onTime: false, note: 'Late afternoon delivery' },
+      { orderDate: new Date(Date.now() - 7 * 86400000), deliveredDate: new Date(Date.now() - 3 * 86400000), turnaroundDays: 4.0, promisedDays: 2, onTime: false, note: 'Truck breakdown reported' },
+    ],
     categories: ['Edible Oil', 'Biscuits', 'Snacks', 'Noodles'],
   },
   {
@@ -54,6 +62,14 @@ const DISTRIBUTORS = [
     phone: '9234567890',
     minimumOrderValue: 2000,
     deliveryDays: 1,
+    effectiveLeadTime: 1.1,
+    onTimeRate: 100,
+    delayBufferDays: 0.1,
+    deliveryHistory: [
+      { orderDate: new Date(Date.now() - 20 * 86400000), deliveredDate: new Date(Date.now() - 19 * 86400000), turnaroundDays: 1.0, promisedDays: 1, onTime: true, note: 'Morning fresh delivery' },
+      { orderDate: new Date(Date.now() - 12 * 86400000), deliveredDate: new Date(Date.now() - 11 * 86400000), turnaroundDays: 1.2, promisedDays: 1, onTime: true, note: 'Delivered before 8 AM' },
+      { orderDate: new Date(Date.now() - 4 * 86400000), deliveredDate: new Date(Date.now() - 3 * 86400000), turnaroundDays: 1.0, promisedDays: 1, onTime: true, note: 'On-time morning route' },
+    ],
     categories: ['Dairy', 'Beverages'],
   },
   {
@@ -61,6 +77,14 @@ const DISTRIBUTORS = [
     phone: '9345678901',
     minimumOrderValue: 3000,
     deliveryDays: 3,
+    effectiveLeadTime: 3.2,
+    onTimeRate: 75,
+    delayBufferDays: 0.2,
+    deliveryHistory: [
+      { orderDate: new Date(Date.now() - 24 * 86400000), deliveredDate: new Date(Date.now() - 21 * 86400000), turnaroundDays: 3.0, promisedDays: 3, onTime: true, note: 'Standard delivery' },
+      { orderDate: new Date(Date.now() - 15 * 86400000), deliveredDate: new Date(Date.now() - 11 * 86400000), turnaroundDays: 3.6, promisedDays: 3, onTime: false, note: 'Partial delay due to rain' },
+      { orderDate: new Date(Date.now() - 6 * 86400000), deliveredDate: new Date(Date.now() - 3 * 86400000), turnaroundDays: 3.0, promisedDays: 3, onTime: true, note: 'Delivered as scheduled' },
+    ],
     categories: ['Flour & Grains', 'Personal Care', 'Household', 'Pulses'],
   },
 ];

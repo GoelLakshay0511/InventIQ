@@ -142,4 +142,18 @@ async function importCSV(req, res, next) {
   }
 }
 
-module.exports = { batchLog, getHistory, getDailySummary, importCSV };
+/**
+ * POST /api/sales/refresh-demo
+ * Bring 30 days of sales data up to today for testing and demo.
+ */
+async function refreshDemoSales(req, res, next) {
+  try {
+    const { refreshRecentSalesForUser } = require('../../services/salesRefresh.service');
+    const result = await refreshRecentSalesForUser(req.user.id);
+    return sendSuccess(res, result, 'Sales history successfully refreshed up to today!');
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { batchLog, getHistory, getDailySummary, importCSV, refreshDemoSales };

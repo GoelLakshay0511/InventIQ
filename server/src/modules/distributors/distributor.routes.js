@@ -11,5 +11,7 @@ router.get('/', distributorController.getDistributors);
 router.post('/', distributorController.createDistributor);
 router.put('/:id', distributorController.updateDistributor);
 router.delete('/:id', distributorController.deleteDistributor);
+router.post('/:id/delivery', distributorController.recordDelivery);
+router.post('/:id/reset-reliability', distributorController.resetReliability);
 
 module.exports = router;
