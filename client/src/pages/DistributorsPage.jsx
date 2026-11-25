@@ -145,10 +145,10 @@ export default function DistributorsPage() {
   return (
     <div className="space-y-5">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-3 fade-up fade-up-d0">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Distributors</h2>
-          <p className="text-sm text-gray-500">{safeDistributors.length} distributor{safeDistributors.length !== 1 ? 's' : ''} saved</p>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>Distributors</h2>
+          <p className="text-sm text-gray-400 mt-0.5 font-medium">{safeDistributors.length} supplier{safeDistributors.length !== 1 ? 's' : ''} linked to your store</p>
         </div>
         <button onClick={() => setModal('add')} className="btn-primary">
           <Plus size={16} /> Add Distributor
@@ -164,40 +164,56 @@ export default function DistributorsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {safeDistributors.map((d) => (
-            <div key={d._id} className="card space-y-2">
+          {safeDistributors.map((d) => {
+            const initials = d.name.split(' ').slice(0,2).map(w=>w[0]?.toUpperCase()).join('');
+            return (
+            <div key={d._id} className="card card-interactive space-y-3">
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-semibold text-gray-800">{d.name}</p>
-                  <p className="text-sm text-gray-500">📞 {d.phone}</p>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
+                    style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', color: '#fff' }}
+                  >
+                    {initials || <Truck size={16} />}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800 leading-tight">{d.name}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">📞 {d.phone}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => openEdit(d)}
-                    className="p-1 text-gray-400 hover:text-primary-600 transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                     title="Edit distributor"
                     aria-label="Edit distributor"
                   >
-                    <Pencil size={16} />
+                    <Pencil size={15} />
                   </button>
                   <button
                     onClick={() => handleDelete(d)}
-                    className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     title="Delete distributor"
                     aria-label="Delete distributor"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
 
-              <div className="text-xs text-gray-500 space-y-1 pt-1 border-t border-gray-50">
-                <p>Min. order: <strong className="text-gray-700">₹{d.minimumOrderValue ?? 0}</strong></p>
-                <p>Delivery: <strong className="text-gray-700">{d.deliveryDays ?? '—'} day{d.deliveryDays !== 1 ? 's' : ''}</strong></p>
+              <div className="text-xs text-gray-500 space-y-1 pt-2 border-t border-gray-50">
+                <div className="flex items-center justify-between">
+                  <span>Min. order</span>
+                  <strong className="text-gray-800 font-semibold">₹{d.minimumOrderValue ?? 0}</strong>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Delivery</span>
+                  <strong className="text-gray-800 font-semibold">{d.deliveryDays ?? '—'} day{d.deliveryDays !== 1 ? 's' : ''}</strong>
+                </div>
                 {d.categories?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 pt-1">
+                  <div className="flex flex-wrap gap-1 pt-1.5">
                     {d.categories.map((cat) => (
-                      <span key={cat} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                      <span key={cat} className="bg-primary-50 text-primary-700 border border-primary-100 px-2 py-0.5 rounded-full text-[11px] font-medium">
                         {cat}
                       </span>
                     ))}
@@ -205,7 +221,8 @@ export default function DistributorsPage() {
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

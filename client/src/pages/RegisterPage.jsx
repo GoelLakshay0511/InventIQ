@@ -316,7 +316,7 @@ export default function RegisterPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', system-ui, sans-serif; }
         @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
@@ -354,8 +354,10 @@ export default function RegisterPage() {
 
             {/* Brand */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <div style={{ width: 56, height: 56, background: `linear-gradient(135deg, ${C.green700}, ${C.green500})`, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.75rem', marginBottom: '1rem', boxShadow: `0 8px 24px rgba(22,163,74,.35)` }}>📦</div>
-              <h1 style={{ fontFamily: "'Outfit',sans-serif", fontSize: '1.625rem', fontWeight: 800, color: C.gray900, letterSpacing: '-.02em', marginBottom: '.25rem' }}>Create your account</h1>
+              <div style={{ width: 56, height: 56, background: `linear-gradient(135deg, ${C.green700}, ${C.green500})`, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: `0 8px 24px rgba(22,163,74,.35)` }}>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M13 2L4.09 12.26a1 1 0 0 0 .91 1.74H11l-1 8 8.91-10.26a1 1 0 0 0-.91-1.74H13l1-8z"/></svg>
+              </div>
+              <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: '1.625rem', fontWeight: 800, color: C.gray900, letterSpacing: '-.02em', marginBottom: '.25rem' }}>Create your account</h1>
               <p style={{ color: C.gray500, fontSize: '.875rem', textAlign: 'center' }}>Register your kirana store on InventIQ — free, forever.</p>
             </div>
 

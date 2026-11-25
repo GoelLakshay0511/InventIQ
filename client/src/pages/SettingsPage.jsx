@@ -121,9 +121,9 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-xl">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">Settings</h2>
-        <p className="text-sm text-gray-500">Manage your store profile, forecasting parameters & security</p>
+      <div className="fade-up fade-up-d0">
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>Settings</h2>
+        <p className="text-sm text-gray-400 mt-0.5 font-medium">Store profile, forecast parameters &amp; account security</p>
       </div>
 
       {/* ── Settings form ───────────────────────────────────────────────────── */}
