@@ -19,6 +19,8 @@ import {
   MessageCircle,
   Truck,
   ArrowRight,
+  Zap,
+  Activity,
 } from 'lucide-react';
 
 /* ── Urgency colour maps (module-level constants — stable references) ────── */
@@ -35,15 +37,9 @@ const urgencyWeight = { critical: 4, high: 3, medium: 2, low: 1 };
 /* ── Skeleton loader — matches dashboard structure ───────────────────────── */
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
-      {/* header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="space-y-2">
-          <div className="skeleton h-7 w-32" />
-          <div className="skeleton h-4 w-56" />
-        </div>
-        <div className="skeleton h-10 w-44 rounded-xl" />
-      </div>
+    <div className="space-y-5">
+      {/* hero banner */}
+      <div className="skeleton h-36 rounded-2xl" />
       {/* stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[0,1,2,3].map(i => (
@@ -69,21 +65,111 @@ function DashboardSkeleton() {
   );
 }
 
+/**
+ * Hero banner — gradient dark card shown at the top of the dashboard.
+ * Shows store summary + urgent items count at a glance.
+ */
+function HeroBanner({ criticalItems, itemsToReorder, onGenerate, generating }) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  return (
+    <div className="hero-banner fade-up fade-up-d0">
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: 'rgba(34,197,94,0.2)', border: '1px solid rgba(34,197,94,0.3)' }}
+            >
+              <Zap size={14} style={{ color: '#4ade80' }} fill="#4ade80" />
+            </div>
+            <span className="text-xs font-semibold" style={{ color: '#4ade80' }}>
+              Live Inventory Intelligence
+            </span>
+          </div>
+          <h2
+            className="text-2xl font-bold leading-tight"
+            style={{ color: '#f1f5f9', fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}
+          >
+            Good{now.getHours() < 12 ? ' Morning' : now.getHours() < 17 ? ' Afternoon' : ' Evening'} 👋
+          </h2>
+          <p className="text-sm mt-1" style={{ color: '#64748b' }}>
+            {dateStr} · {timeStr}
+          </p>
+
+          {/* Quick status pills */}
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            {criticalItems > 0 ? (
+              <span
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse inline-block" />
+                {criticalItems} Critical Stockout{criticalItems !== 1 ? 's' : ''}
+              </span>
+            ) : (
+              <span
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.3)' }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+                All stock levels healthy
+              </span>
+            )}
+            {itemsToReorder > 0 && (
+              <span
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                style={{ background: 'rgba(249,115,22,0.15)', color: '#fb923c', border: '1px solid rgba(249,115,22,0.3)' }}
+              >
+                <Activity size={11} />
+                {itemsToReorder} items to reorder
+              </span>
+            )}
+          </div>
+        </div>
+
+        <button
+          onClick={onGenerate}
+          disabled={generating}
+          className="btn-primary self-start sm:self-auto shrink-0"
+          style={{ minWidth: '180px' }}
+        >
+          <RefreshCw size={15} className={generating ? 'animate-spin' : ''} />
+          {generating ? 'Analyzing…' : 'Generate Forecast'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /** Small stat card used in the top stats row */
-function StatCard({ icon: Icon, label, shortLabel, value, color = 'text-gray-700', iconBg = 'bg-gray-100/80', to }) {
+function StatCard({ icon: Icon, label, shortLabel, value, color = 'text-gray-700', iconBg = 'bg-gray-100/80', iconColor, to, pill, pillStyle }) {
+  const isHexBg = typeof iconBg === 'string' && iconBg.startsWith('#');
   const content = (
-    <div className={`card card-interactive flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 ${to ? 'cursor-pointer' : ''}`}>
-      <div className={`p-2 sm:p-2.5 rounded-xl ${iconBg} shrink-0`}>
-        <Icon size={18} className={color} />
+    <div className={`card card-interactive flex items-center gap-2.5 sm:gap-4 p-3 sm:p-4 ${to ? 'cursor-pointer' : ''}`}>
+      <div
+        className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl shrink-0 flex items-center justify-center ${!isHexBg ? iconBg : ''}`}
+        style={isHexBg ? { background: iconBg } : {}}
+      >
+        <Icon size={20} className={color} style={iconColor ? { color: iconColor } : {}} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-tight text-gray-400 leading-tight">
+        <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider sm:tracking-widest text-gray-400 truncate leading-tight">
           <span className="sm:hidden">{shortLabel || label}</span>
           <span className="hidden sm:inline">{label}</span>
         </p>
-        <p className={`text-xl sm:text-2xl font-black mt-0.5 nums leading-none ${color}`}>
-          {value ?? '0'}
-        </p>
+        <div className="flex items-end gap-1.5 sm:gap-2 mt-0.5 flex-wrap">
+          <p className={`text-2xl sm:text-3xl font-black nums leading-none ${color}`} style={iconColor ? { color: iconColor } : {}}>
+            {value ?? '—'}
+          </p>
+          {pill && (
+            <span className={`stat-pill mb-0.5 ${pillStyle ?? 'stat-pill-up'}`}>
+              {pill}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -237,38 +323,71 @@ export default function DashboardPage() {
   if (isLoading) return <DashboardSkeleton />;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
 
-      {/* ── Page header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-2.5 fade-up fade-up-d0">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Dashboard</h2>
-          <p className="text-xs sm:text-sm text-gray-500 mt-0.5 font-normal">Real-time inventory intelligence for your store</p>
-        </div>
-        <button
-          onClick={generateForecast}
-          disabled={generatingForecast}
-          className="btn-primary text-xs sm:text-sm py-2 px-3 sm:py-2.5 sm:px-4 font-semibold"
-        >
-          <RefreshCw size={15} className={generatingForecast ? 'animate-spin' : ''} />
-          <span className="hidden sm:inline">{generatingForecast ? 'Analyzing Trends…' : 'Generate New Forecast'}</span>
-          <span className="sm:hidden">{generatingForecast ? 'Analyzing…' : 'New Forecast'}</span>
-        </button>
-      </div>
+      {/* ── Hero banner ──────────────────────────────────────────────────────── */}
+      <HeroBanner
+        criticalItems={criticalItems}
+        itemsToReorder={itemsToReorder}
+        onGenerate={generateForecast}
+        generating={generatingForecast}
+      />
 
       {/* ── Stats row ───────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <div className="fade-up fade-up-d1">
-          <StatCard icon={Package}       label="Total Products"    shortLabel="Products"     value={totalProducts}  iconBg="bg-blue-50"   color="text-blue-600"     to="/products" />
+          <StatCard
+            icon={Package}
+            label="Total Products"
+            shortLabel="Products"
+            value={totalProducts}
+            iconBg="#eff6ff"
+            iconColor="#2563eb"
+            color="text-blue-600"
+            to="/products"
+          />
         </div>
         <div className="fade-up fade-up-d2">
-          <StatCard icon={TrendingUp}    label="Top Sellers"       shortLabel="Top Sellers"  value={topSellers}     iconBg="bg-green-50"  color="text-primary-600"  to="/products" />
+          <StatCard
+            icon={TrendingUp}
+            label="Top Sellers"
+            shortLabel="Top Sellers"
+            value={topSellers}
+            iconBg="#f0fdf4"
+            iconColor="#16a34a"
+            color="text-primary-600"
+            to="/products"
+            pill="FMCG"
+            pillStyle="stat-pill-up"
+          />
         </div>
         <div className="fade-up fade-up-d3">
-          <StatCard icon={AlertTriangle} label="Items to Reorder"  shortLabel="To Reorder"   value={itemsToReorder} iconBg="bg-orange-50" color="text-orange-500"   to="/reorder" />
+          <StatCard
+            icon={AlertTriangle}
+            label="Items to Reorder"
+            shortLabel="To Reorder"
+            value={itemsToReorder}
+            iconBg="#fff7ed"
+            iconColor="#ea580c"
+            color="text-orange-600"
+            to="/reorder"
+            pill={itemsToReorder > 0 ? '⚠ Action' : undefined}
+            pillStyle="stat-pill-warn"
+          />
         </div>
         <div className="fade-up fade-up-d4">
-          <StatCard icon={Archive}       label="Critical Stockouts" shortLabel="Out of Stock" value={criticalItems}  iconBg="bg-red-50"    color="text-red-500"      to="/reorder" />
+          <StatCard
+            icon={Archive}
+            label="Critical Stockouts"
+            shortLabel="Out of Stock"
+            value={criticalItems}
+            iconBg="#fef2f2"
+            iconColor="#dc2626"
+            color="text-red-600"
+            to="/reorder"
+            pill={criticalItems > 0 ? 'Urgent' : undefined}
+            pillStyle="stat-pill-down"
+          />
         </div>
       </div>
 
@@ -385,6 +504,9 @@ export default function DashboardPage() {
 
         {/* Bar chart */}
         <div className="card">
+          <div className="flex items-center justify-between mb-1">
+            <span className="section-label">Reorder Priority</span>
+          </div>
           <div className="flex items-center justify-between mb-3">
             <div>
               <h3 className="font-bold text-gray-900 text-base leading-tight">Top 5 Items by Urgency</h3>
@@ -452,6 +574,9 @@ export default function DashboardPage() {
 
         {/* Reorder Alerts panel */}
         <div className="card flex flex-col">
+          <div className="flex items-center justify-between mb-1">
+            <span className="section-label">Live Alerts</span>
+          </div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-gray-900 text-base">
               Reorder Alerts

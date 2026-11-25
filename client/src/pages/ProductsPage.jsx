@@ -335,11 +335,11 @@ export default function ProductsPage() {
   return (
     <div className="space-y-4 md:space-y-5">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-2.5">
+      <div className="flex items-center justify-between flex-wrap gap-2.5 fade-up fade-up-d0">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Products</h2>
-          <p className="text-xs md:text-sm text-gray-500 mt-0.5 font-normal">
-            {filteredProducts.length} of {safeProducts.length} products listed
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>Products</h2>
+          <p className="text-xs md:text-sm text-gray-400 mt-0.5 font-medium">
+            {filteredProducts.length} of {safeProducts.length} products · your complete FMCG catalog
           </p>
         </div>
         {/* Action Buttons */}

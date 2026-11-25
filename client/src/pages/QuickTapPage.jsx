@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import Papa from 'papaparse';
@@ -22,6 +22,17 @@ import {
 } from 'lucide-react';
 import apiClient from '../api/client';
 import LoadingSpinner from '../components/shared/LoadingSpinner';
+import { Capacitor } from '@capacitor/core';
+import { SpeechRecognition as CapSpeechPlugin } from '@capacitor-community/speech-recognition';
+
+/* ── Capacitor detection helper ───────────────────────────────────────────── */
+const isNativeAndroid = () => {
+  try {
+    return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
+  } catch {
+    return false;
+  }
+};
 
 /* ── Number word dictionary (English + Hinglish + Hindi Devanagari + Phonetic) ── */
 const NUMBER_WORDS = {
@@ -58,84 +69,198 @@ const DEVANAGARI_DIGITS = {
 
 /* ── English Devanagari to English Display Dictionary ─────────────────────── */
 const ENGLISH_DEVANAGARI_DICT = {
+  // Common Kirana Brands & Products
   'कोलगेट': 'Colgate',
-  'एंड': 'and',
-  'सोल्ड': 'sold',
-  'टुडे': 'today',
+  'पेस्ट': 'Paste',
+  'दंत': 'Dant',
+  'मंजन': 'Manjan',
   'फ्रूटी': 'Frooti',
   'लाइफबॉय': 'Lifebuoy',
-  'सोप': 'soap',
-  'साबुन': 'soap',
-  'ऑयल': 'oil',
-  'तेल': 'oil',
-  'बटर': 'butter',
-  'मिल्क': 'milk',
-  'बिस्कुट': 'biscuit',
+  'सोप': 'Soap',
+  'साबुन': 'Soap',
+  'ऑयल': 'Oil',
+  'तेल': 'Oil',
+  'मीठा तेल': 'Oil',
+  'बटर': 'Butter',
+  'मक्खन': 'Butter',
+  'मिल्क': 'Milk',
+  'दूध': 'Milk',
+  'फुल क्रीम': 'Full Cream',
+  'दही': 'Curd',
+  'कर्ड': 'Curd',
+  'बिस्कुट': 'Biscuit',
   'मैगी': 'Maggi',
-  'नूडल्स': 'noodles',
-  'नूडल': 'noodles',
+  'नूडल्स': 'Noodles',
+  'नूडल': 'Noodles',
   'सर्फ': 'Surf',
   'एक्सेल': 'Excel',
   'विम': 'Vim',
-  'बार': 'bar',
-  'जेल': 'gel',
+  'बार': 'Bar',
+  'जेल': 'Gel',
+  'बर्तन': 'Dishwash',
   'डेटॉल': 'Dettol',
   'हैंडवॉश': 'Handwash',
   'बिसलेरी': 'Bisleri',
-  'पानी': 'water',
-  'वाटर': 'water',
+  'पानी': 'Water',
+  'वाटर': 'Water',
   'फॉर्च्यून': 'Fortune',
+  'फॉर्चून': 'Fortune',
   'सनफ्लावर': 'Sunflower',
   'सफोला': 'Saffola',
   'गोल्ड': 'Gold',
   'पारले': 'Parle',
+  'पारले जी': 'Parle-G',
+  'पारले-जी': 'Parle-G',
   'गुड': 'Good',
   'डे': 'Day',
+  'गुड डे': 'Good Day',
+  'बर्बन': 'Bourbon',
   'लेस': 'Lays',
-  'चिप्स': 'chips',
+  'चिप्स': 'Chips',
   'कुरकुरे': 'Kurkure',
   'कोक': 'Coke',
   'कोका': 'Coca',
   'कोला': 'Cola',
   'टाटा': 'Tata',
-  'नमक': 'salt',
-  'सॉल्ट': 'salt',
-  'चीनी': 'sugar',
-  'शुगर': 'sugar',
+  'नमक': 'Salt',
+  'सॉल्ट': 'Salt',
+  'चीनी': 'Sugar',
+  'शक्कर': 'Sugar',
+  'शुगर': 'Sugar',
   'आटा': 'Atta',
   'आशीर्वाद': 'Aashirvaad',
-  'दाल': 'dal',
-  'तूर': 'Toor',
-  'चना': 'Chana',
+  'दाल': 'Dal',
+  'तूर': 'Toor Dal',
+  'अरहर': 'Toor Dal',
+  'चना': 'Chana Dal',
   'हारपिक': 'Harpic',
-  'शैम्पू': 'shampoo',
+  'शैम्पू': 'Shampoo',
   'रेड': 'Red',
   'लेबल': 'Label',
-  'टी': 'tea',
-  'चाय': 'tea',
-  'कॉफी': 'coffee',
+  'रेड लेबल': 'Red Label',
+  'टी': 'Tea',
+  'चाय': 'Tea',
+  'पत्ती': 'Tea',
+  'कॉफी': 'Coffee',
   'नेस्कैफे': 'Nescafe',
   'गेंदा': 'Genda',
   'फूल': 'Phool',
-  'अमूल': 'Amul'
+  'अमूल': 'Amul',
+  'शरबत': 'Sharbat',
+  'रूह अफज़ा': 'Rooh Afza',
+  'रूहअफजा': 'Rooh Afza',
+  'कॉर्न': 'Corn',
+  'फ्लेक्स': 'Flakes',
+
+  // Units & Quantities
+  'पैकेट': 'pack',
+  'पैक': 'pack',
+  'पैक्स': 'packs',
+  'बोतल': 'bottle',
+  'बॉटल': 'bottle',
+  'पीस': 'pcs',
+  'कप': 'cup',
+  'बोरी': 'bag',
+  'बैग': 'bag',
+  'किलो': 'kg',
+  'लीटर': 'L',
+  'ग्राम': 'g',
+  'डब्बा': 'box',
+  'पेटी': 'carton',
+
+  // Conjunctions & Verbs
+  'और': 'and',
+  'तथा': 'and',
+  'व': 'and',
+  'या': 'or',
+  'एंड': 'and',
+  'सोल्ड': 'sold',
+  'टुडे': 'today',
+  'आज': 'today',
+  'बिका': 'sold',
+  'बिकी': 'sold',
+  'बिके': 'sold',
+  'बेचा': 'sold',
+  'दिए': 'given',
+  'दिया': 'given',
+  'का': 'of',
+  'की': 'of',
+  'के': 'of',
+  'वाले': '',
+  'वाली': '',
+  'वाला': '',
+  'है': '',
+  'हैं': '',
+  'था': '',
+  'थी': '',
+  'थे': ''
 };
 
-function formatDisplayTranscript(rawText) {
+/* ── Transliterate any remaining Devanagari to clean Latin characters ─────── */
+function transliterateDevanagariToLatin(str) {
+  if (!str) return '';
+  const devMap = {
+    'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo', 'ऋ': 'ri',
+    'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au', 'ऑ': 'o', 'ऍ': 'e',
+    'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ng',
+    'च': 'ch', 'छ': 'chh', 'ज': 'j', 'झ': 'jh', 'ञ': 'ny',
+    'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n',
+    'त': 't', 'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n',
+    'प': 'p', 'फ': 'f', 'ब': 'b', 'भ': 'bh', 'म': 'm',
+    'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v',
+    'श': 'sh', 'ष': 'sh', 'स': 's', 'ह': 'h',
+    'ा': 'a', 'ि': 'i', 'ी': 'i', 'ु': 'u', 'ू': 'u',
+    'े': 'e', 'ै': 'ai', 'ो': 'o', 'ौ': 'au', 'ॉ': 'o', 'ॅ': 'e',
+    '्': '', 'ं': 'n', 'ँ': 'n', 'ः': 'h', '़': '',
+    'फ़': 'f', 'ज़': 'z', 'ड़': 'r', 'ढ़': 'rh'
+  };
+  const consonants = 'कखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसहफ़ज़ड़ढ़';
+  const matras = 'ािीुूेैोौॉॅ्';
+
+  let out = '';
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    const next = str[i + 1];
+    if (devMap[ch] !== undefined) {
+      out += devMap[ch];
+      if (consonants.includes(ch) && next && !matras.includes(next) && next !== ' ') {
+        out += 'a';
+      }
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
+/* ── Uniform English Confirmation Formatter ──────────────────────────────── */
+function formatDisplayTranscript(rawText, matchedResults = []) {
   if (!rawText) return '';
-  // Check if spoken in English: contains English grammar/verb markers
-  const isEnglishSpoken = /(?<=^|\s)(end|and|sold|today|sale|units|packs|packet|pieces|piece|bottle|can|box|carton|एंड|सोल्ड|टुडे|सेल|यूनिट्स|पैक्स|पीस|बॉटल)(?=$|\s)/i.test(rawText);
 
-  if (!isEnglishSpoken) {
-    return rawText; // Preserve pure Hindi output as-is
+  // 1. If products were recognized, format them as a 100% uniform English sentence
+  if (matchedResults && matchedResults.length > 0) {
+    return matchedResults.map((m) => `${m.qty} × ${m.name}`).join(', ');
   }
 
-  // If spoken in English, translate transcribed Devanagari words into clean English
-  let formatted = rawText;
+  // 2. Otherwise convert raw speech into 100% clean Latin / English script
+  let text = rawText.replace(/[०-९]/g, (d) => DEVANAGARI_DIGITS[d] || d);
+
+  // Replace recognized Devanagari words from the dictionary
   for (const [hi, en] of Object.entries(ENGLISH_DEVANAGARI_DICT)) {
-    const rx = new RegExp(hi, 'g');
-    formatted = formatted.replace(rx, en);
+    if (en) {
+      const rx = new RegExp(hi, 'g');
+      text = text.replace(rx, en);
+    }
   }
-  return formatted.replace(/।/g, '.').replace(/\s+/g, ' ').trim();
+
+  // Transliterate any remaining Devanagari characters so there is ZERO mixed script
+  text = transliterateDevanagariToLatin(text);
+
+  return text
+    .replace(/[।]/g, '.')
+    .replace(/[^a-zA-Z0-9\s.,\-+×]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /* ── Universal Devanagari to Latin Transliteration ────────────────────────── */
@@ -236,8 +361,8 @@ const PRODUCT_ALIASES = [
   { keywords: ['genda phool', 'genda fool', 'ginda fool', 'genda', 'ginda', 'phool', 'गेंदा फूल', 'गेंदा', 'फूल', 'marigold', 'marie gold'], match: 'genda phool' },
 
   // Butter & Dairy
-  { keywords: ['butter', 'makhan', 'makkhan', 'मक्खन', 'बटर', 'अमूल बटर', 'अमुल बटर', 'amul butter', 'amul'], match: 'amul butter' },
-  { keywords: ['milk', 'doodh', 'amul milk', 'amul doodh', 'full cream', 'दूध', 'अमूल दूध'], match: 'amul full cream' },
+  { keywords: ['amul butter', 'butter', 'makhan', 'makkhan', 'मक्खन', 'बटर', 'अमूल बटर', 'अमुल बटर'], match: 'amul butter' },
+  { keywords: ['amul milk', 'amul doodh', 'milk', 'doodh', 'full cream', 'दूध', 'अमूल दूध', 'अमुल दूध', 'अमूल मिल्क'], match: 'amul full cream' },
   { keywords: ['curd', 'dahi', 'दही', 'mother dairy curd'], match: 'curd' },
 
   // Biscuits & Snacks
@@ -394,25 +519,53 @@ export default function QuickTapPage() {
     if (!desc || !safeAllProducts.length) return null;
     const cleanDesc = desc.toLowerCase().trim();
     const normSpoken = universalPhonetic(cleanDesc);
+    if (!normSpoken || normSpoken.length < 2) return null;
 
-    // Tier 1: Check known Kirana aliases dictionary
+    // Tier 1: Score ALL matching Kirana aliases and pick the MOST SPECIFIC (longest) match
+    // This prevents generic words like "dal", "oil", "tea", "biscuit" from overriding
+    // specific products like "chana dal", "saffola oil", "tata tea", "good day biscuit".
+    let bestAliasProduct = null;
+    let bestAliasScore = 0;
+
     for (const alias of PRODUCT_ALIASES) {
-      if (
-        alias.keywords.some(
-          (kw) => cleanDesc.includes(kw.toLowerCase()) || (normSpoken && normSpoken.includes(universalPhonetic(kw)))
-        )
-      ) {
-        const found = safeAllProducts.find((p) => p.name.toLowerCase().includes(alias.match.toLowerCase()));
-        if (found) return found;
+      for (const kw of alias.keywords) {
+        const kwLower = kw.toLowerCase();
+        const kwNorm = universalPhonetic(kwLower);
+        const exactWordMatch = new RegExp(`(^|\\s)${kwLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`).test(cleanDesc);
+        const normWordMatch = kwNorm && new RegExp(`(^|\\s)${kwNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`).test(normSpoken);
+        const substrMatch = cleanDesc.includes(kwLower) || (kwNorm && kwNorm.length >= 3 && normSpoken.includes(kwNorm));
+
+        if (exactWordMatch || normWordMatch || substrMatch) {
+          const found = safeAllProducts.find((p) => p.name.toLowerCase().includes(alias.match.toLowerCase()));
+          if (found) {
+            // Prefer multi-word and exact word matches over short single-word substring matches
+            const score = (kwLower.length * 10) + (exactWordMatch || normWordMatch ? 50 : 0);
+            if (score > bestAliasScore) {
+              bestAliasScore = score;
+              bestAliasProduct = found;
+            }
+          }
+        }
       }
     }
 
-    // Tier 2: Direct phonetic substring matching across all catalog products
-    for (const p of safeAllProducts) {
-      const normCatalog = universalPhonetic(p.name);
-      if (normCatalog.includes(normSpoken) || normSpoken.includes(normCatalog)) {
-        return p;
+    if (bestAliasProduct) return bestAliasProduct;
+
+    // Tier 2: Direct phonetic substring matching across all catalog products (min 3 chars)
+    if (normSpoken.length >= 3) {
+      let bestSubProduct = null;
+      let bestSubLen = 0;
+      for (const p of safeAllProducts) {
+        const normCatalog = universalPhonetic(p.name);
+        if (normCatalog.length >= 3 && (normCatalog.includes(normSpoken) || normSpoken.includes(normCatalog))) {
+          const matchLen = Math.min(normCatalog.length, normSpoken.length);
+          if (matchLen > bestSubLen) {
+            bestSubLen = matchLen;
+            bestSubProduct = p;
+          }
+        }
       }
+      if (bestSubProduct) return bestSubProduct;
     }
 
     // Tier 3: Universal fuzzy acoustic scoring (Levenshtein token distance)
@@ -445,79 +598,189 @@ export default function QuickTapPage() {
     return bestScore >= 0.60 ? bestProduct : null;
   };
 
-  /* ── Bi-directional Voice Input Parser ───────────────────────────────────── */
+  /* ── Extract 1 or more products from a single description span ──────────── */
+  const extractProductsFromDesc = (desc) => {
+    if (!desc) return [];
+    const tokens = desc.trim().split(/\s+/).filter(Boolean);
+    if (tokens.length === 0) return [];
+
+    // Try matching the full phrase first
+    const fullMatch = findProductMatch(desc);
+    if (!fullMatch) return [];
+
+    // Check if there are extra tokens that belong to a DIFFERENT product
+    // (e.g., user said "5 maggi chana dal" without "and" or a second number)
+    if (tokens.length >= 2) {
+      const matchedCatalogNorm = universalPhonetic(`${fullMatch.name} ${fullMatch.brand || ''}`);
+      const remainingTokens = tokens.filter((tok) => {
+        const tokNorm = universalPhonetic(tok);
+        if (!tokNorm || tokNorm.length < 2) return false;
+        // Keep token if it doesn't belong to the matched product or its aliases
+        const inCatalog = matchedCatalogNorm.split(/\s+/).some((ct) => similarity(tokNorm, ct) >= 0.72);
+        if (inCatalog) return false;
+
+        // Also check if this token is part of the matched product's alias keywords
+        const matchedAlias = PRODUCT_ALIASES.find((a) =>
+          fullMatch.name.toLowerCase().includes(a.match.toLowerCase())
+        );
+        if (matchedAlias) {
+          const inAlias = matchedAlias.keywords.some((kw) => {
+            const kwNorm = universalPhonetic(kw);
+            return kwNorm.split(/\s+/).some((kt) => similarity(tokNorm, kt) >= 0.75);
+          });
+          if (inAlias) return false;
+        }
+        return true;
+      });
+
+      if (remainingTokens.length > 0 && remainingTokens.length < tokens.length) {
+        const extraMatches = extractProductsFromDesc(remainingTokens.join(' '));
+        const uniqueExtras = extraMatches.filter((p) => p._id !== fullMatch._id);
+        return [fullMatch, ...uniqueExtras];
+      }
+    }
+
+    return [fullMatch];
+  };
+
+  /* ── Robust Multi-Product Voice Input Parser ────────────────────────────── */
   const parseVoiceInput = (rawText) => {
+    if (!rawText) return;
+
     let text = rawText.toLowerCase().trim();
 
     // 1. Replace Devanagari numerals (० to ९) with 0-9
     text = text.replace(/[०-९]/g, (d) => DEVANAGARI_DIGITS[d] || d);
 
-    // 2. Replace number words (English + Hinglish + Devanagari + acoustic sound-alikes) with digits
-    for (const [word, val] of Object.entries(NUMBER_WORDS)) {
+    // 2. Separate attached numbers and units (e.g. "2kg" -> "2 kg", "5packs" -> "5 packs")
+    text = text.replace(/(\d+)\s*(kg|kilo|g|gm|gram|l|ltr|litre|liter|ml|pcs|pc|pack|packs|packet|packets|bottle|bottles)\b/gi, '$1 $2');
+
+    // 3. Replace number words (English + Hinglish + Devanagari + phonetic) with digits
+    // Sort words by length descending so multi-word numbers match first
+    const sortedNumWords = Object.entries(NUMBER_WORDS).sort((a, b) => b[0].length - a[0].length);
+    for (const [word, val] of sortedNumWords) {
       const escaped = word.replace("'", "\\'");
       const rx = new RegExp(`(?<=^|[\\s.,!?:;])${escaped}(?=$|[\\s.,!?:;])`, 'gi');
       text = text.replace(rx, ` ${val} `);
     }
 
-    // 3. Strip Hindi danda (।), dots, commas, question marks, quotes
-    text = text.replace(/[।.,?!;:"']/g, ' ');
+    // 4. Strip Hindi danda (।), dots, commas, question marks, quotes, brackets
+    text = text.replace(/[।.,?!;:"'()\\/]/g, ' ');
 
-    // 4. Clean common Hindi filler, verb particles & unit words
-    const fillers = [
-      'aaj', 'bika', 'bik gaya', 'biki', 'bike', 'begin', 'diya', 'diye', 'becha', 'beche', 'hoga',
-      'ka', 'ki', 'ke', 'ko', 'hai', 'hain', 'wali', 'wale',
-      'आज', 'बिका', 'बिकी', 'बिके', 'बिक गया', 'बिक गए', 'दिया', 'दिए', 'बेचा', 'बेचे', 'होगा', 'है', 'हैं', 'का', 'की', 'के', 'को', 'वाले', 'वाली',
-      'pack', 'packet', 'bottle', 'piece', 'pcs', 'cup', 'bori', 'bag', 'units', 'litres', 'litre', 'liter', 'kg', 'kilo', 'gram',
-      'पैकेट', 'पैक', 'बोतल', 'पीस', 'कप', 'बोरी', 'बैग', 'किलो', 'लीटर'
+    // 5. Clean common conversational filler words, but keep product names
+    const conversationalFillers = [
+      'aaj', 'bika', 'bik gaya', 'bik gaye', 'biki', 'bike', 'gaya', 'gaye', 'becha', 'beche',
+      'diya', 'diye', 'hoga', 'hai', 'hain', 'ka', 'ki', 'ke', 'ko', 'wali', 'wale',
+      'bhaiya', 'bhai', 'likho', 'likh lo', 'daalo', 'karo', 'total', 'huye', 'hua',
+      'sold', 'today', 'sale', 'give', 'me', 'please', 'bhi', 'dena', 'de', 'le', 'lo', 'of',
+      'आज', 'बिका', 'बिकी', 'बिके', 'बिक गया', 'बिक गए', 'गया', 'गए', 'दिया', 'दिए', 'बेचा', 'बेचे', 'होगा', 'है', 'हैं',
+      'का', 'की', 'के', 'को', 'वाले', 'वाली', 'भैया', 'लिखो', 'डालो', 'करो', 'हुए', 'हुआ', 'भी', 'देना'
     ];
-    for (const f of fillers) {
+    for (const f of conversationalFillers) {
       const rx = new RegExp(`(?<=^|\\s)${f}(?=$|\\s)`, 'gi');
       text = text.replace(rx, ' ');
     }
 
-    // 5. Split input by phrase separators: "aur", "and", "और", "or", ",", ";", "+", "&"
-    const phrases = text.split(/\s*(?:,|;|\band\b|\baur\b|और|or|\+|\&)\s*/i).filter((p) => p.trim());
+    // 6. Clean common packaging unit words
+    const unitFillers = [
+      'packet', 'packets', 'pack', 'packs', 'bottle', 'bottles', 'piece', 'pieces', 'pcs', 'pc',
+      'cup', 'cups', 'bori', 'bag', 'bags', 'units', 'unit', 'litres', 'litre', 'liter', 'liters', 'ltr',
+      'kg', 'kilo', 'gram', 'gm', 'dabba', 'dappe', 'peti', 'carton', 'can', 'cans',
+      'पैकेट', 'पैक', 'पैक्स', 'बोतल', 'बॉटल', 'पीस', 'कप', 'बोरी', 'बैग', 'किलो', 'लीटर', 'डब्बा', 'पेटी', 'कार्टन'
+    ];
+    for (const u of unitFillers) {
+      const rx = new RegExp(`(?<=^|\\s)${u}(?=$|\\s)`, 'gi');
+      text = text.replace(rx, ' ');
+    }
+
+    // 7. Split input on conjunctions and phrase separators
+    // \bor\b MUST have \b word boundary so words like "fortune" or "bourbon" are not broken!
+    const clauses = text.split(/\s*(?:,|;|\band\b|\baur\b|और|\bor\b|\bthen\b|\bphir\b|फिर|\balso\b|\bplus\b|\+|\&)\s*/i).filter((c) => c.trim());
     const segments = [];
 
-    for (const phrase of phrases) {
-      const tokens = phrase.trim().split(/\s+/).filter(Boolean);
+    for (const clause of clauses) {
+      const tokens = clause.trim().split(/\s+/).filter(Boolean);
       if (tokens.length === 0) continue;
 
-      let currentQty = null;
-      let currentDesc = [];
-      const startsWithNum = /^\d+$/.test(tokens[0]);
+      // Identify positions of all numeric tokens
+      const numPositions = [];
+      tokens.forEach((tok, idx) => {
+        if (/^\d+$/.test(tok)) {
+          numPositions.push(idx);
+        }
+      });
 
-      if (startsWithNum) {
-        // Pattern: <qty> <desc...> <qty> <desc...>
-        for (const t of tokens) {
-          if (/^\d+$/.test(t)) {
-            if (currentQty !== null && currentDesc.length > 0) {
-              segments.push({ qty: currentQty, desc: currentDesc.join(' ') });
-              currentDesc = [];
-            }
-            currentQty = parseInt(t, 10);
-          } else {
-            currentDesc.push(t);
-          }
-        }
-        if (currentQty !== null && currentDesc.length > 0) {
-          segments.push({ qty: currentQty, desc: currentDesc.join(' ') });
-        }
+      if (numPositions.length === 0) {
+        // No number in clause -> treat as quantity 1
+        const desc = tokens.join(' ').trim();
+        if (desc) segments.push({ qty: 1, desc });
+      } else if (numPositions.length === 1) {
+        const numIdx = numPositions[0];
+        const qty = parseInt(tokens[numIdx], 10);
+        const descTokens = tokens.filter((_, idx) => idx !== numIdx);
+        const desc = descTokens.join(' ').trim();
+        if (desc && qty > 0) segments.push({ qty, desc });
       } else {
-        // Pattern: <desc...> <qty> <desc...> <qty>
-        for (const t of tokens) {
-          if (/^\d+$/.test(t)) {
-            const qty = parseInt(t, 10);
-            if (currentDesc.length > 0) {
-              segments.push({ qty, desc: currentDesc.join(' ') });
-              currentDesc = [];
+        // Multiple numbers in a single clause:
+        // Handle <qty> <desc> <qty> <desc>, <desc> <qty> <desc> <qty>, AND mixed adjacent numbers (e.g. "maggi 5 2 chana dal")
+        const startsWithNum = numPositions[0] === 0;
+        const endsWithNum = numPositions[numPositions.length - 1] === tokens.length - 1;
+
+        if (startsWithNum && !endsWithNum) {
+          // Pattern: <qty1> <desc1...> <qty2> <desc2...>
+          for (let i = 0; i < numPositions.length; i++) {
+            const startNum = numPositions[i];
+            const nextNum = i + 1 < numPositions.length ? numPositions[i + 1] : tokens.length;
+            const qty = parseInt(tokens[startNum], 10);
+            const desc = tokens.slice(startNum + 1, nextNum).join(' ').trim();
+            if (desc && qty > 0) {
+              segments.push({ qty, desc });
             }
-          } else {
-            currentDesc.push(t);
           }
-        }
-        if (currentDesc.length > 0 && currentQty !== null) {
-          segments.push({ qty: currentQty, desc: currentDesc.join(' ') });
+        } else if (!startsWithNum && endsWithNum) {
+          // Pattern: <desc1...> <qty1> <desc2...> <qty2> (or mixed "maggi 5 2 chana dal" handled via adjacent check)
+          let cursor = 0;
+          for (let i = 0; i < numPositions.length; i++) {
+            const numPos = numPositions[i];
+            const qty = parseInt(tokens[numPos], 10);
+            const descBefore = tokens.slice(cursor, numPos).join(' ').trim();
+            if (descBefore && qty > 0) {
+              segments.push({ qty, desc: descBefore });
+              cursor = numPos + 1;
+            } else if (!descBefore && i === numPositions.length - 1) {
+              cursor = numPos + 1;
+            } else {
+              // Adjacent number belongs to the tokens AFTER it
+              const nextNum = i + 1 < numPositions.length ? numPositions[i + 1] : tokens.length;
+              const descAfter = tokens.slice(numPos + 1, nextNum).join(' ').trim();
+              if (descAfter && qty > 0) {
+                segments.push({ qty, desc: descAfter });
+                cursor = nextNum;
+              }
+            }
+          }
+        } else {
+          // Mixed boundary pattern (e.g., "maggi 5 2 chana dal" or "5 maggi chana dal 2")
+          let cursor = 0;
+          for (let i = 0; i < numPositions.length; i++) {
+            const numPos = numPositions[i];
+            const qty = parseInt(tokens[numPos], 10);
+            const nextNum = i + 1 < numPositions.length ? numPositions[i + 1] : tokens.length;
+            const descAfter = tokens.slice(numPos + 1, nextNum).join(' ').trim();
+            const descBefore = tokens.slice(cursor, numPos).join(' ').trim();
+
+            if (numPos === cursor && descAfter) {
+              segments.push({ qty, desc: descAfter });
+              cursor = nextNum;
+            } else if (descBefore) {
+              segments.push({ qty, desc: descBefore });
+              cursor = numPos + 1;
+            }
+          }
+          if (cursor < tokens.length) {
+            const leftover = tokens.slice(cursor).join(' ').trim();
+            if (leftover) segments.push({ qty: 1, desc: leftover });
+          }
         }
       }
     }
@@ -528,7 +791,7 @@ export default function QuickTapPage() {
       if (numMatch) {
         const qty = parseInt(numMatch[1], 10);
         const desc = text.replace(/\b\d+\b/g, '').trim();
-        if (desc) segments.push({ qty, desc });
+        if (desc && qty > 0) segments.push({ qty, desc });
       }
     }
 
@@ -536,8 +799,8 @@ export default function QuickTapPage() {
     const updated = { ...counts };
 
     for (const seg of segments) {
-      const matched = findProductMatch(seg.desc);
-      if (matched) {
+      const matchedList = extractProductsFromDesc(seg.desc);
+      for (const matched of matchedList) {
         updated[matched._id] = (updated[matched._id] || 0) + seg.qty;
         matchedResults.push({
           productId: matched._id,
@@ -548,31 +811,100 @@ export default function QuickTapPage() {
       }
     }
 
-    const displayHeard = formatDisplayTranscript(rawText);
+    // Generate 100% uniform English display text for confirmation banner & toasts
+    const uniformDisplay = formatDisplayTranscript(rawText, matchedResults);
 
     if (matchedResults.length > 0) {
       setCounts(updated);
       setVoiceBanner({
-        rawText: displayHeard,
+        rawText: uniformDisplay,
         matches: matchedResults,
       });
-      toast.success(`Voice Recognized: Updated ${matchedResults.length} item(s)!`);
+      toast.success(`Voice Recognized: Added ${matchedResults.length} item(s)!`);
     } else {
       setVoiceBanner({
-        rawText: displayHeard,
+        rawText: uniformDisplay,
         matches: [],
       });
-      toast(`Heard: "${displayHeard}", but couldn't match product. Try: "10 fortune oil 5 maggi" or "milk 2"`, {
+      toast(`Heard: "${uniformDisplay}". Could not match products. Try: "5 Maggi, 2 Fortune Oil"`, {
         icon: '🎙️',
         duration: 4500,
       });
     }
   };
 
-  const toggleListening = () => {
+  /* ── Voice Input: Android (Capacitor plugin) + Web (Web Speech API) ──────── */
+  const toggleListening = async () => {
+    // ── Android native path via @capacitor-community/speech-recognition ───────
+    if (isNativeAndroid()) {
+      const SR = CapSpeechPlugin;
+      // If already listening → stop
+      if (isListening) {
+        try { await SR.stop(); } catch (_) { /* ignore */ }
+        setIsListening(false);
+        return;
+      }
+
+      // Request microphone permission
+      let permResult;
+      try {
+        permResult = await SR.requestPermissions();
+      } catch (e) {
+        toast.error('Could not request microphone permission.');
+        return;
+      }
+      if (permResult?.speechRecognition !== 'granted' && permResult?.microphone !== 'granted') {
+        toast.error('Microphone permission denied. Please enable it in App Settings → Permissions.');
+        return;
+      }
+
+      // Check if the device supports speech recognition
+      const { available } = await SR.available().catch(() => ({ available: false }));
+      if (!available) {
+        toast.error('Speech recognition is not available on this device.');
+        return;
+      }
+
+      setIsListening(true);
+      setVoiceBanner(null);
+
+      try {
+        const { matches } = await SR.start({
+          language: 'hi-IN',
+          maxResults: 3,
+          popup: false,          // no Android system dialog
+          partialResults: false,
+        });
+
+        // Pick the best (first) result
+        const transcript = matches?.[0] ?? '';
+        if (transcript) {
+          parseVoiceInput(transcript);
+        } else {
+          toast("Couldn't hear anything. Please speak clearly and try again.", { icon: '🎙️' });
+        }
+      } catch (err) {
+        const code = err?.message || '';
+        if (code.includes('No match') || code.includes('nomatch')) {
+          toast("Couldn't hear anything clearly. Try again.", { icon: '🎙️' });
+        } else if (code.includes('permission') || code.includes('denied')) {
+          toast.error('Microphone access denied. Enable it in device Settings.');
+        } else if (code.includes('network')) {
+          toast.error('Voice recognition needs an internet connection on Android.');
+        } else {
+          toast.error('Voice recognition error. Please try again.');
+          console.error('Capacitor SR error:', err);
+        }
+      } finally {
+        setIsListening(false);
+      }
+      return;
+    }
+
+    // ── Web / iOS path via Web Speech API (Chrome, Edge, desktop) ────────────
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error('Voice input is supported in Google Chrome and Microsoft Edge.');
+      toast.error('Voice input requires Google Chrome or Microsoft Edge on this device.');
       return;
     }
 
@@ -583,7 +915,7 @@ export default function QuickTapPage() {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = 'hi-IN'; // Unified multi-lingual mode (handles Hindi, Hinglish & English)
+    recognition.lang = 'hi-IN';
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -601,7 +933,15 @@ export default function QuickTapPage() {
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
       setIsListening(false);
-      toast.error('Microphone access denied or speech timed out.');
+      if (event.error === 'not-allowed') {
+        toast.error('Microphone access denied. Please allow microphone in browser settings.');
+      } else if (event.error === 'network') {
+        toast.error('Voice recognition requires an internet connection.');
+      } else if (event.error === 'no-speech') {
+        toast("No speech detected. Please try again.", { icon: '🎙️' });
+      } else {
+        toast.error('Microphone error. Please try again.');
+      }
     };
 
     recognition.onend = () => {
@@ -761,7 +1101,7 @@ export default function QuickTapPage() {
       {/* ── Top Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between flex-wrap gap-2.5">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Daily Sales Entry</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>Daily Sales Entry</h2>
           <p className="text-xs md:text-sm text-gray-500 mt-0.5 font-normal">{todayLabel()}</p>
         </div>
 
@@ -804,14 +1144,16 @@ export default function QuickTapPage() {
             }`}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 font-semibold">
-              <Sparkles size={15} className={voiceBanner.matches.length > 0 ? 'text-green-600' : 'text-amber-600'} />
-              <span>Voice Note Heard:</span>
-              <span className="italic font-normal">"{voiceBanner.rawText}"</span>
+            <div className="flex items-center gap-1.5 font-semibold flex-wrap">
+              <Sparkles size={15} className={voiceBanner.matches.length > 0 ? 'text-green-600 shrink-0' : 'text-amber-600 shrink-0'} />
+              <span>{voiceBanner.matches.length > 0 ? 'Voice Recognized:' : 'Voice Heard:'}</span>
+              <span className="font-semibold text-gray-800 bg-white/90 px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
+                "{voiceBanner.rawText}"
+              </span>
             </div>
             <button
               onClick={() => setVoiceBanner(null)}
-              className="text-gray-400 hover:text-gray-700 text-sm font-bold"
+              className="text-gray-400 hover:text-gray-700 text-sm font-bold ml-2"
             >
               ✕
             </button>
@@ -819,7 +1161,7 @@ export default function QuickTapPage() {
 
           {voiceBanner.matches.length > 0 ? (
             <div className="flex flex-wrap items-center gap-2 pt-0.5">
-              <span className="text-[11px] font-medium text-green-700">Matched & Updated:</span>
+              <span className="text-[11px] font-bold text-green-700">Stock Updated:</span>
               {voiceBanner.matches.map((m, idx) => (
                 <span
                   key={idx}

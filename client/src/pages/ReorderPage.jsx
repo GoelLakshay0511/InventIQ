@@ -139,18 +139,18 @@ export default function ReorderPage() {
   return (
     <div className="space-y-5">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-2.5">
+      <div className="flex items-center justify-between flex-wrap gap-2.5 fade-up fade-up-d0">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Reorder Suggestions</h2>
-          <p className="text-xs md:text-sm text-gray-500 mt-0.5 font-normal">
-            {suggestions.length} item{suggestions.length !== 1 ? 's' : ''} needing restock
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>Reorder Suggestions</h2>
+          <p className="text-xs md:text-sm text-gray-400 mt-0.5 font-medium">
+            {suggestions.length} item{suggestions.length !== 1 ? 's' : ''} · AI forecast + safety buffer analysis
           </p>
         </div>
         <button
           onClick={() => setShowOcrModal(true)}
-          className="btn-outline flex items-center gap-1.5 text-xs py-2 px-3 font-semibold bg-white"
+          className="btn-primary text-xs"
         >
-          <Camera size={15} className="text-primary-600" />
+          <Camera size={16} />
           <span className="hidden sm:inline">Scan Delivery Invoice</span>
           <span className="sm:hidden">Scan Bill</span>
         </button>

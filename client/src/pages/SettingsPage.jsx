@@ -178,10 +178,10 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4 max-w-4xl mx-auto pb-6">
       {/* ── Page Header ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 fade-up fade-up-d0">
         <div className="min-w-0">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Settings</h2>
-          <p className="text-xs text-gray-500 mt-0.5 truncate font-normal">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>Settings</h2>
+          <p className="text-xs sm:text-sm text-gray-400 mt-0.5 truncate font-medium">
             Store profile, forecasting parameters &amp; security
           </p>
         </div>
