@@ -49,7 +49,7 @@ body {
   overscroll-behavior: none !important;
   /* Inter for body text, Plus Jakarta Sans for headings via .font-heading */
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #F0F4F8;
+  background-color: #F6F8FA;
   color: #111827;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
