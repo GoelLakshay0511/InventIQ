@@ -13,29 +13,32 @@ const C = {
 
 export default function SiteFooter() {
   return (
-    <footer style={{ background: C.gray900, padding: '4rem 0 2rem', margin: 0, marginTop: 'auto', width: '100%', border: 'none' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.2fr 1fr', gap: '3rem', marginBottom: '3rem', paddingBottom: '3rem', borderBottom: `1px solid ${C.gray800}` }} className="iq-footer-grid">
-          <div>
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '.625rem', fontFamily: "'Outfit',sans-serif", fontSize: '1.5rem', fontWeight: 800, color: '#fff', textDecoration: 'none', marginBottom: '.75rem' }}>
-              <div style={{ width: 36, height: 36, background: C.green600, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>📦</div>
+    <footer className="bg-gray-900 pt-7 pb-5 sm:pt-12 sm:pb-7 m-0 mt-auto w-full border-none">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+        <div
+          className="grid grid-cols-3 lg:grid-cols-[2fr_1fr_1.2fr_1fr] gap-x-3 gap-y-5 sm:gap-8 lg:gap-12 mb-5 sm:mb-8 pb-5 sm:pb-8"
+          style={{ borderBottom: `1px solid ${C.gray800}` }}
+        >
+          <div className="col-span-3 lg:col-span-1">
+            <Link to="/" className="inline-flex items-center gap-2 font-bold text-lg sm:text-2xl text-white no-underline mb-1.5 sm:mb-2.5" style={{ fontFamily: "'Outfit',sans-serif" }}>
+              <div style={{ width: 30, height: 30, background: C.green600, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.95rem' }}>📦</div>
               InventIQ
             </Link>
-            <p style={{ color: C.gray400, fontSize: '.9375rem', lineHeight: 1.65, maxWidth: 320, margin: 0 }}>
+            <p className="text-xs sm:text-sm leading-relaxed m-0 max-w-[320px]" style={{ color: C.gray400 }}>
               Smart Kirana Inventory Forecaster. Less time on spreadsheets, more time with customers.
             </p>
           </div>
 
           <div>
-            <div style={{ color: C.gray200, fontWeight: 700, fontSize: '.875rem', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '1.25rem' }}>Product</div>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '.75rem', padding: 0, margin: 0 }}>
+            <div className="text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-2 sm:mb-3" style={{ color: C.gray200 }}>Product</div>
+            <ul className="list-none flex flex-col gap-1.5 sm:gap-2.5 p-0 m-0">
               {[
                 ['/#features', 'Features'],
                 ['/#how-it-works', 'How It Works'],
-                ['/#forecasting', 'Forecasting Engine'],
+                ['/#forecasting', 'Forecasting'],
               ].map(([href, lbl]) => (
                 <li key={lbl}>
-                  <a href={href} style={{ color: C.gray400, fontSize: '.9375rem', textDecoration: 'none', transition: 'color .2s' }}
+                  <a href={href} className="text-xs sm:text-sm no-underline transition-colors duration-200" style={{ color: C.gray400 }}
                     onMouseEnter={e => e.currentTarget.style.color = C.green400}
                     onMouseLeave={e => e.currentTarget.style.color = C.gray400}>
                     {lbl}
@@ -46,17 +49,17 @@ export default function SiteFooter() {
           </div>
 
           <div>
-            <div style={{ color: C.gray200, fontWeight: 700, fontSize: '.875rem', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '1.25rem' }}>Company</div>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '.75rem', padding: 0, margin: 0 }}>
+            <div className="text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-2 sm:mb-3" style={{ color: C.gray200 }}>Company</div>
+            <ul className="list-none flex flex-col gap-1.5 sm:gap-2.5 p-0 m-0">
               <li>
-                <Link to="/about" style={{ color: C.gray400, fontSize: '.9375rem', textDecoration: 'none', transition: 'color .2s' }}
+                <Link to="/about" className="text-xs sm:text-sm no-underline transition-colors duration-200" style={{ color: C.gray400 }}
                   onMouseEnter={e => e.currentTarget.style.color = C.green400}
                   onMouseLeave={e => e.currentTarget.style.color = C.gray400}>
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/contact" style={{ color: C.gray400, fontSize: '.9375rem', textDecoration: 'none', transition: 'color .2s' }}
+                <Link to="/contact" className="text-xs sm:text-sm no-underline transition-colors duration-200" style={{ color: C.gray400 }}
                   onMouseEnter={e => e.currentTarget.style.color = C.green400}
                   onMouseLeave={e => e.currentTarget.style.color = C.gray400}>
                   Contact Us
@@ -66,17 +69,17 @@ export default function SiteFooter() {
           </div>
 
           <div>
-            <div style={{ color: C.gray200, fontWeight: 700, fontSize: '.875rem', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '1.25rem' }}>Account</div>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '.75rem', padding: 0, margin: 0 }}>
+            <div className="text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-2 sm:mb-3" style={{ color: C.gray200 }}>Account</div>
+            <ul className="list-none flex flex-col gap-1.5 sm:gap-2.5 p-0 m-0">
               <li>
-                <Link to="/register" style={{ color: C.gray400, fontSize: '.9375rem', textDecoration: 'none', transition: 'color .2s' }}
+                <Link to="/register" className="text-xs sm:text-sm no-underline transition-colors duration-200" style={{ color: C.gray400 }}
                   onMouseEnter={e => e.currentTarget.style.color = C.green400}
                   onMouseLeave={e => e.currentTarget.style.color = C.gray400}>
                   Register Store
                 </Link>
               </li>
               <li>
-                <Link to="/login" style={{ color: C.gray400, fontSize: '.9375rem', textDecoration: 'none', transition: 'color .2s' }}
+                <Link to="/login" className="text-xs sm:text-sm no-underline transition-colors duration-200" style={{ color: C.gray400 }}
                   onMouseEnter={e => e.currentTarget.style.color = C.green400}
                   onMouseLeave={e => e.currentTarget.style.color = C.gray400}>
                   Login
@@ -86,11 +89,11 @@ export default function SiteFooter() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <p style={{ color: C.gray500, fontSize: '.875rem', margin: 0 }}>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 text-center sm:text-left">
+          <p className="text-xs sm:text-sm m-0" style={{ color: C.gray500 }}>
             © 2026 InventIQ Technologies Inc. · All rights reserved
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', fontSize: '.875rem' }}>
+          <div className="flex items-center justify-center gap-3 text-xs sm:text-sm flex-wrap">
             <Link to="/privacy" style={{ color: C.gray400, textDecoration: 'none', transition: 'color .2s' }}
               onMouseEnter={e => e.currentTarget.style.color = C.green400}
               onMouseLeave={e => e.currentTarget.style.color = C.gray400}>

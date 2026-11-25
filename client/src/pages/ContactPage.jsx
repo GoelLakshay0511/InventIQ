@@ -4,6 +4,35 @@ import toast from 'react-hot-toast';
 import SiteFooter from '../components/shared/SiteFooter';
 import useAuthStore from '../store/authStore';
 
+const CONTACT_STYLES = `
+  .iq-sp-nav-inner { max-width:1200px; margin:0 auto; padding:.875rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
+  .iq-sp-logo { display:flex; align-items:center; gap:.625rem; text-decoration:none; font-family:'Outfit',sans-serif; font-weight:800; font-size:1.35rem; color:#15803d; white-space:nowrap; }
+  .iq-sp-logo-badge { width:34px; height:34px; min-width:34px; background:#16a34a; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1rem; color:#fff; }
+  .iq-sp-nav-right { display:flex; align-items:center; gap:1rem; }
+  .iq-sp-nav-home { color:#4b5563; text-decoration:none; font-size:.9rem; font-weight:500; white-space:nowrap; }
+  .iq-sp-cta { background:#16a34a; color:#fff; text-decoration:none; font-size:.9rem; font-weight:600; padding:.45rem 1.15rem; border-radius:8px; box-shadow:0 2px 8px rgba(22,163,74,.3); display:inline-flex; align-items:center; gap:.4rem; white-space:nowrap; }
+  .iq-sp-login-btn { color:#374151; text-decoration:none; font-size:.9rem; font-weight:600; padding:.45rem 1rem; border-radius:8px; border:1.5px solid #e5e7eb; white-space:nowrap; }
+  .iq-sp-get-started { background:#16a34a; color:#fff; text-decoration:none; font-size:.9rem; font-weight:600; padding:.45rem 1.15rem; border-radius:8px; box-shadow:0 2px 8px rgba(22,163,74,.3); white-space:nowrap; }
+  .iq-sp-hero { background:linear-gradient(135deg,#14532d 0%,#15803d 100%); color:#fff; padding:4rem 1.5rem; text-align:center; }
+  .iq-sp-main { max-width:1080px; margin:0 auto; padding:4rem 1.5rem; flex:1; width:100%; box-sizing:border-box; }
+  .iq-sp-content-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:3rem; align-items:start; }
+  .iq-contact-phone-email-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  @media (max-width:640px) {
+    .iq-sp-nav-inner { padding:.6rem 1rem; }
+    .iq-sp-logo { font-size:1.1rem; gap:.4rem; }
+    .iq-sp-logo-badge { width:28px; height:28px; min-width:28px; font-size:.85rem; border-radius:6px; }
+    .iq-sp-nav-home { display:none; }
+    .iq-sp-nav-right { gap:.5rem; }
+    .iq-sp-cta { font-size:.78rem; padding:.38rem .75rem; border-radius:7px; }
+    .iq-sp-login-btn { font-size:.78rem; padding:.38rem .65rem; }
+    .iq-sp-get-started { font-size:.78rem; padding:.38rem .75rem; }
+    .iq-sp-hero { padding:2.5rem 1rem; }
+    .iq-sp-main { padding:2rem 1rem; }
+    .iq-sp-content-grid { grid-template-columns:1fr; gap:1.5rem; }
+    .iq-contact-phone-email-row { grid-template-columns:1fr; }
+  }
+`;
+
 const C = {
   green50: '#f0fdf4',
   green100: '#dcfce7',
@@ -49,24 +78,25 @@ export default function ContactPage() {
 
   return (
     <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: '#fff', color: C.gray900, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      
+      <style>{CONTACT_STYLES}</style>
+
       {/* ── TOP NAV ──────────────────────────────────────────────────────── */}
       <header style={{ background: '#fff', borderBottom: `1px solid ${C.gray200}`, position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '.875rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '.625rem', textDecoration: 'none', fontFamily: "'Outfit',sans-serif", fontWeight: 800, fontSize: '1.35rem', color: C.green700 }}>
-            <div style={{ width: 34, height: 34, background: C.green600, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: '#fff' }}>📦</div>
+        <div className="iq-sp-nav-inner">
+          <Link to="/" className="iq-sp-logo">
+            <div className="iq-sp-logo-badge">📦</div>
             InventIQ
           </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Link to="/" style={{ color: C.gray600, textDecoration: 'none', fontSize: '.9rem', fontWeight: 500 }}>Home</Link>
+          <div className="iq-sp-nav-right">
+            <Link to="/" className="iq-sp-nav-home">Home</Link>
             {isLoggedIn ? (
-              <Link to="/dashboard" style={{ background: C.green600, color: '#fff', textDecoration: 'none', fontSize: '.9rem', fontWeight: 600, padding: '.45rem 1.15rem', borderRadius: 8, boxShadow: '0 2px 8px rgba(22,163,74,.3)', display: 'inline-flex', alignItems: 'center', gap: '.4rem' }}>
+              <Link to="/dashboard" className="iq-sp-cta">
                 Go to Dashboard →
               </Link>
             ) : (
               <>
-                <Link to="/login" style={{ color: C.gray700, textDecoration: 'none', fontSize: '.9rem', fontWeight: 600, padding: '.45rem 1rem', borderRadius: 8, border: `1.5px solid ${C.gray200}` }}>Login</Link>
-                <Link to="/register" style={{ background: C.green600, color: '#fff', textDecoration: 'none', fontSize: '.9rem', fontWeight: 600, padding: '.45rem 1.15rem', borderRadius: 8, boxShadow: '0 2px 8px rgba(22,163,74,.3)' }}>Get Started</Link>
+                <Link to="/login" className="iq-sp-login-btn">Login</Link>
+                <Link to="/register" className="iq-sp-get-started">Get Started</Link>
               </>
             )}
           </div>
@@ -74,23 +104,23 @@ export default function ContactPage() {
       </header>
 
       {/* ── HERO BANNER ─────────────────────────────────────────────────── */}
-      <section style={{ background: `linear-gradient(135deg, ${C.green900} 0%, ${C.green700} 100%)`, color: '#fff', padding: '4rem 1.5rem', textAlign: 'center' }}>
+      <section className="iq-sp-hero">
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.25)', padding: '.35rem 1rem', borderRadius: 999, fontSize: '.8125rem', fontWeight: 600, marginBottom: '1.25rem' }}>
             💬 We'd Love to Hear From You
           </div>
-          <h1 style={{ fontFamily: "'Outfit',sans-serif", fontSize: 'clamp(2.25rem, 4vw, 3rem)', fontWeight: 800, lineHeight: 1.15, marginBottom: '1rem' }}>
+          <h1 style={{ fontFamily: "'Outfit',sans-serif", fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: 800, lineHeight: 1.15, marginBottom: '1rem' }}>
             Contact Us
           </h1>
-          <p style={{ fontSize: '1.125rem', color: 'rgba(255,255,255,.85)', maxWidth: 640, margin: '0 auto', lineHeight: 1.65 }}>
+          <p style={{ fontSize: 'clamp(.9rem, 2.5vw, 1.125rem)', color: 'rgba(255,255,255,.85)', maxWidth: 640, margin: '0 auto', lineHeight: 1.65 }}>
             Have questions about store setup, WhatsApp ordering, or our forecasting engine? Reach out anytime.
           </p>
         </div>
       </section>
 
       {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
-      <main style={{ maxWidth: 1080, margin: '0 auto', padding: '4rem 1.5rem', flex: 1, width: '100%', boxSizing: 'border-box' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3rem', alignItems: 'start' }}>
+      <main className="iq-sp-main">
+        <div className="iq-sp-content-grid">
           
           {/* Left Column: Form */}
           <div style={{ background: '#fff', border: `1px solid ${C.gray200}`, borderRadius: 16, padding: '2.25rem', boxShadow: '0 4px 20px rgba(0,0,0,.04)' }}>
@@ -104,7 +134,7 @@ export default function ContactPage() {
                   style={{ width: '100%', padding: '.75rem 1rem', borderRadius: 8, border: `1.5px solid ${C.gray200}`, fontSize: '.9375rem', outline: 'none', background: C.gray50, boxSizing: 'border-box' }} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="iq-contact-phone-email-row">
                 <div>
                   <label style={{ display: 'block', fontSize: '.875rem', fontWeight: 600, color: C.gray700, marginBottom: '.375rem' }}>Phone Number *</label>
                   <input required type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="10-digit mobile"

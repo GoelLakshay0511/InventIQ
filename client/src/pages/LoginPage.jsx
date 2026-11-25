@@ -200,9 +200,11 @@ export default function LoginPage() {
           <div style={{ padding: '2.5rem 2.5rem 2rem' }}>
             {/* Brand Header */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
-              <div style={{ width: 56, height: 56, background: `linear-gradient(135deg, ${C.green700}, ${C.green500})`, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: `0 8px 24px rgba(22,163,74,.35)` }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M13 2L4.09 12.26a1 1 0 0 0 .91 1.74H11l-1 8 8.91-10.26a1 1 0 0 0-.91-1.74H13l1-8z"/></svg>
-              </div>
+              <img
+                src="/icon.svg"
+                alt="InventIQ"
+                style={{ width: 56, height: 56, borderRadius: 16, marginBottom: '1rem', boxShadow: `0 8px 24px rgba(22,163,74,.35)`, display: 'block' }}
+              />
               <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: '1.625rem', fontWeight: 800, color: C.gray900, letterSpacing: '-.02em', marginBottom: '.25rem' }}>
                 Sign in to your store
               </h1>

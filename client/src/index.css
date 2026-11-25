@@ -38,6 +38,9 @@ html {
   padding: 0;
   width: 100%;
   min-height: 100%;
+  overflow-x: clip;
+  overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -46,7 +49,9 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100%;
+  overflow-x: clip;
   overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
   /* Inter for body text, Plus Jakarta Sans for headings via .font-heading */
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: #F6F8FA;
