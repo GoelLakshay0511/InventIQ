@@ -52,7 +52,7 @@ export default function AppLayout() {
   const initials = getInitials(user?.storeName || user?.name || 'U');
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: '#F0F4F8' }}>
+    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden" style={{ backgroundColor: '#F0F4F8' }}>
 
       {/* ── Desktop dark sidebar ─────────────────────────────────────── */}
       <aside
@@ -153,8 +153,8 @@ export default function AppLayout() {
         </div>
       </aside>
 
-      {/* ── Main content area ────────────────────────────────────────── */}
-      <main className="flex-1 md:ml-64 pb-20 md:pb-0">
+      {/* ── Main content area ───────────────────────────────────────── */}
+      <main className="flex-1 md:ml-64 pb-32 md:pb-8 w-full max-w-full overflow-x-hidden">
 
         {/* Mobile top bar */}
         <header
@@ -212,20 +212,27 @@ export default function AppLayout() {
         </header>
 
         {/* Page content */}
-        <div className="p-4 md:p-6 max-w-7xl mx-auto">
+        <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto w-full">
           <Outlet />
         </div>
       </main>
 
-      {/* ── Mobile bottom nav ─────────────────────────────────────────── */}
+      {/* ── Mobile bottom nav (Fixed & elevated above cards) ────────── */}
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-center justify-around py-1"
+        className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 flex items-center justify-around px-1 pt-1.5 pb-2.5 sm:pb-3"
         style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: '100%',
+          zIndex: 50,
           background: 'rgba(255,255,255,0.95)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderTop: '1px solid rgba(226,232,240,0.8)',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.07)',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+          paddingBottom: 'max(10px, env(safe-area-inset-bottom, 10px))',
         }}
       >
         {navItems.map(({ to, label, Icon }) => (
@@ -234,21 +241,20 @@ export default function AppLayout() {
             to={to}
             end={to === '/dashboard'}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-1.5 transition-colors ${
-                isActive ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
+              `flex-1 flex flex-col items-center justify-center py-1 transition-colors outline-none focus:outline-none focus-visible:outline-none active:bg-transparent select-none ${
+                isActive ? 'text-primary-600 font-bold' : 'text-gray-400 hover:text-gray-600 font-medium'
               }`
             }
-            style={{ minHeight: '44px' }}
           >
             {({ isActive }) => (
               <>
                 <div
-                  className="p-1 rounded-lg transition-all duration-150"
+                  className="p-1 rounded-xl transition-all duration-150"
                   style={isActive ? { background: '#dcfce7' } : {}}
                 >
-                  <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+                  <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className="shrink-0" />
                 </div>
-                <span className={`text-[10px] mt-0.5 tracking-tight font-medium ${isActive ? 'font-semibold' : ''}`}>
+                <span className={`text-[10px] leading-tight mt-0.5 tracking-tight text-center truncate max-w-full ${isActive ? 'font-semibold' : ''}`}>
                   {label}
                 </span>
               </>

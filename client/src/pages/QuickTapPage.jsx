@@ -18,6 +18,7 @@ import {
   Sparkles,
   ArrowRight,
   RotateCcw,
+  Star,
 } from 'lucide-react';
 import apiClient from '../api/client';
 import LoadingSpinner from '../components/shared/LoadingSpinner';
@@ -1085,59 +1086,62 @@ export default function QuickTapPage() {
 
   const totalItems = Object.values(counts).reduce((sum, v) => sum + v, 0);
   const selectedCount = Object.values(counts).filter((v) => v > 0).length;
+  const totalAmount = useMemo(() => {
+    return Object.entries(counts).reduce((sum, [id, qty]) => {
+      if (qty <= 0) return sum;
+      const p = safeAllProducts.find((item) => item._id === id);
+      return sum + (p?.sellingPrice ? p.sellingPrice * qty : 0);
+    }, 0);
+  }, [counts, safeAllProducts]);
 
   if (isLoadingAll) return <LoadingSpinner size="lg" />;
 
   return (
-    <div className="space-y-5 pb-16">
+    <div className="space-y-4 md:space-y-5 pb-32">
       {/* ── Top Header ──────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-2.5">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>Daily Sales Entry</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{todayLabel()}</p>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>Daily Sales Entry</h2>
+          <p className="text-xs md:text-sm text-gray-500 mt-0.5 font-normal">{todayLabel()}</p>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* CSV Import Button */}
-          <button
-            onClick={() => setShowCsvModal(true)}
-            className="btn-outline text-xs py-2 px-3 flex items-center gap-1.5 shadow-2xs"
-            title="Import from Vyapar / Khatabook / Excel"
-          >
-            <FileSpreadsheet size={15} />
-            Import CSV
-          </button>
-
+        <div className="flex items-center gap-2">
           {/* Voice Note Button */}
           <button
+            type="button"
             onClick={toggleListening}
-            className={`flex items-center gap-1.5 text-xs py-2 px-3 rounded-lg border font-semibold transition-all shadow-2xs ${
-              isListening
-                ? 'bg-red-600 text-white border-red-600 animate-pulse'
-                : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-            }`}
+            className={`flex items-center gap-1.5 text-xs py-2 px-3 rounded-xl border font-semibold transition-all shadow-2xs ${isListening
+              ? 'bg-red-600 text-white border-red-600 animate-pulse'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100'
+              }`}
+            title="Tap to speak items sold today in Hindi or English (e.g. '10 milk 5 oil')"
           >
-            {isListening ? <MicOff size={15} /> : <Mic size={15} className="text-primary-600" />}
-            {isListening ? 'Listening (Speak)...' : 'Voice Note'}
+            {isListening ? <MicOff size={15} /> : <Mic size={15} className="text-emerald-600" />}
+            <span>{isListening ? 'Listening…' : 'Voice Note'}</span>
           </button>
 
-          {/* Items Counter Badge */}
-          <div className="flex items-center gap-2 bg-primary-50 text-primary-700 px-3.5 py-2 rounded-xl font-semibold text-xs shrink-0 border border-primary-200">
-            <ShoppingBag size={15} />
-            {totalItems} item{totalItems !== 1 ? 's' : ''} to save
-          </div>
+          {/* CSV Import Button */}
+          <button
+            type="button"
+            onClick={() => setShowCsvModal(true)}
+            className="btn-outline text-xs py-2 px-3 flex items-center gap-1.5 bg-white font-semibold rounded-xl"
+            title="Import from Vyapar / Khatabook / Excel"
+          >
+            <FileSpreadsheet size={15} className="text-primary-600" />
+            <span className="hidden sm:inline">Import CSV</span>
+            <span className="sm:hidden">CSV</span>
+          </button>
         </div>
       </div>
 
       {/* ── Voice Feedback Banner ─────────────────────────────────────────── */}
       {voiceBanner && (
         <div
-          className={`p-3.5 rounded-xl border text-xs space-y-2 transition-all ${
-            voiceBanner.matches.length > 0
-              ? 'bg-green-50 border-green-200 text-green-950'
-              : 'bg-amber-50 border-amber-200 text-amber-950'
-          }`}
+          className={`p-3.5 rounded-xl border text-xs space-y-2 transition-all ${voiceBanner.matches.length > 0
+            ? 'bg-green-50 border-green-200 text-green-950'
+            : 'bg-amber-50 border-amber-200 text-amber-950'
+            }`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 font-semibold flex-wrap">
@@ -1232,65 +1236,76 @@ export default function QuickTapPage() {
         </div>
       )}
 
-      {/* ── Search & Filter Controls ────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Navigation Tabs */}
-        <div className="flex bg-gray-100 p-1 rounded-xl text-xs font-semibold text-gray-600 w-full sm:w-auto">
-          <button
-            onClick={() => setActiveTab('top')}
-            className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg transition-colors ${
-              activeTab === 'top' ? 'bg-white text-gray-900 shadow-2xs' : 'hover:text-gray-900'
-            }`}
-          >
-            ⭐ Top Sellers ({topSellers.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg transition-colors ${
-              activeTab === 'all' ? 'bg-white text-gray-900 shadow-2xs' : 'hover:text-gray-900'
-            }`}
-          >
-            📦 All Products ({allProducts.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('selected')}
-            className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg transition-colors ${
-              activeTab === 'selected' ? 'bg-white text-primary-700 shadow-2xs' : 'hover:text-gray-900'
-            }`}
-          >
-            Selected ({selectedCount})
-          </button>
-        </div>
-
+      {/* ── Search & Filter Controls Card ────────────────────────────────────── */}
+      <div className="card p-3 space-y-2.5">
         {/* Real-time Search Bar */}
-        <div className="relative flex-1 max-w-sm">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search product or brand to tap..."
-            className="w-full pl-9 pr-8 py-2 text-xs border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+            className="w-full pl-9 pr-8 py-2 text-xs md:text-sm border border-gray-200 rounded-xl bg-gray-50/70 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs p-1"
             >
               ✕
             </button>
           )}
         </div>
+
+        {/* 3-Segmented Navigation Tabs */}
+        <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setActiveTab('top')}
+            className={`py-2 px-1.5 rounded-lg text-center transition-all truncate flex items-center justify-center gap-1 ${activeTab === 'top'
+              ? 'bg-white text-gray-900 shadow-2xs font-bold'
+              : 'text-gray-500 hover:text-gray-800'
+              }`}
+          >
+            <span>⭐ Top</span>
+            <span className="text-[11px] opacity-75">({topSellers.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('all')}
+            className={`py-2 px-1.5 rounded-lg text-center transition-all truncate flex items-center justify-center gap-1 ${activeTab === 'all'
+              ? 'bg-white text-gray-900 shadow-2xs font-bold'
+              : 'text-gray-500 hover:text-gray-800'
+              }`}
+          >
+            <span>📦 All</span>
+            <span className="text-[11px] opacity-75">({safeAllProducts.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('selected')}
+            className={`py-2 px-1.5 rounded-lg text-center transition-all truncate flex items-center justify-center gap-1 ${activeTab === 'selected'
+              ? 'bg-emerald-600 text-white shadow-2xs font-bold'
+              : selectedCount > 0
+                ? 'bg-emerald-50 text-emerald-800 font-bold'
+                : 'text-gray-500 hover:text-gray-800'
+              }`}
+          >
+            <span>✅ Selected</span>
+            <span className="text-[11px]">({selectedCount})</span>
+          </button>
+        </div>
       </div>
 
-      {/* ── Product Cards Grid ──────────────────────────────────────────────── */}
+      {/* ── Product Cards Grid (High Density, Kirana Touch Optimized) ────────── */}
       {displayProducts.length === 0 ? (
         <div className="card text-center py-12 text-gray-400">
           <p className="text-4xl mb-3">🔍</p>
-          <p className="font-medium text-gray-600">No matching products found.</p>
+          <p className="font-semibold text-gray-600 text-sm">No matching products found.</p>
           <p className="text-xs text-gray-400 mt-1">
             {activeTab === 'selected'
-              ? 'No products have been keyed in yet today. Tap + on any product or use Voice.'
+              ? 'No products have been keyed in yet today. Tap + on any product or use Voice Note.'
               : 'Try clearing your search query or switch to "All Products".'}
           </p>
           {activeTab === 'selected' && (
@@ -1303,71 +1318,92 @@ export default function QuickTapPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
           {displayProducts.map((product) => {
             const qty = counts[product._id] ?? 0;
+            const isLow = product.currentStock <= (product.reorderPoint || 5);
             return (
               <div
                 key={product._id}
-                className={`card flex flex-col justify-between gap-3 transition-all ${
-                  qty > 0
-                    ? 'border-primary-500 bg-primary-50/20 ring-2 ring-primary-500/30 shadow-xs'
-                    : 'hover:border-gray-300'
-                }`}
+                className={`p-3 bg-white rounded-2xl border transition-all flex items-center justify-between gap-2.5 ${qty > 0
+                  ? 'border-emerald-500 bg-emerald-50/20 ring-1.5 ring-emerald-500/40 shadow-xs'
+                  : 'border-gray-200/90 hover:border-gray-300 shadow-2xs'
+                  }`}
               >
-                {/* Product Info */}
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-semibold text-gray-800 text-sm leading-tight">{product.name}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {product.brand ? `${product.brand} · ` : ''}{product.category}
-                    </p>
+                {/* Product Info, Price & Stock */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h4 className="font-bold text-gray-900 text-xs sm:text-sm leading-snug">
+                      {product.name}
+                    </h4>
+                    {product.isTopSeller && (
+                      <span className="text-[9px] bg-yellow-100 text-yellow-800 px-1.5 py-0.2 rounded font-extrabold flex items-center gap-0.5 shrink-0">
+                        <Star size={9} fill="currentColor" /> Top
+                      </span>
+                    )}
                   </div>
-                  <span
-                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
-                      product.currentStock <= 5
-                        ? 'bg-red-50 text-red-600 border border-red-200'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}
-                  >
-                    Stock: {product.currentStock} {product.unit || ''}
-                  </span>
+
+                  <div className="flex items-center gap-2 text-[11px] text-gray-500 mt-1 flex-wrap">
+                    <span className="bg-gray-100 text-gray-600 px-1.5 py-0.2 rounded text-[10px] font-medium">
+                      {product.category}
+                    </span>
+                    {product.sellingPrice ? (
+                      <span className="font-extrabold text-gray-900 text-xs">
+                        ₹{product.sellingPrice}
+                      </span>
+                    ) : null}
+                    <span
+                      className={`text-[10px] font-semibold px-1.5 py-0.2 rounded ${isLow
+                        ? 'bg-red-50 text-red-600 font-bold'
+                        : 'text-gray-400'
+                        }`}
+                    >
+                      Stock: {product.currentStock} {product.unit || 'units'}
+                    </span>
+                  </div>
+
+                  {/* If qty > 0, live item subtotal */}
+                  {qty > 0 && product.sellingPrice ? (
+                    <div className="text-[11px] font-bold text-emerald-700 mt-1">
+                      Subtotal: {qty} × ₹{product.sellingPrice} = ₹{(qty * product.sellingPrice).toLocaleString('en-IN')}
+                    </div>
+                  ) : null}
                 </div>
 
-                {/* +/- Touch-Friendly Counter */}
-                <div className="flex items-center justify-between gap-3 mt-1 pt-1 border-t border-gray-100">
+                {/* Tactile Quick-Tap Stepper */}
+                <div className="flex items-center gap-1 shrink-0 bg-gray-50/80 p-1 rounded-xl border border-gray-200/70">
                   <button
+                    type="button"
                     onClick={() => decrement(product._id)}
-                    aria-label={`Decrease ${product.name}`}
-                    className="h-12 w-12 rounded-xl bg-gray-100 hover:bg-gray-200 active:scale-95
-                               flex items-center justify-center text-gray-700 text-xl font-bold
-                               transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                     disabled={qty === 0}
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold transition-all active:scale-90 ${qty > 0
+                      ? 'bg-white text-red-600 hover:bg-red-50 shadow-2xs border border-gray-200'
+                      : 'text-gray-300 cursor-not-allowed opacity-30'
+                      }`}
+                    title="Decrease (-1)"
                   >
-                    <Minus size={18} />
+                    <Minus size={15} />
                   </button>
 
-                  <div className="text-center">
+                  <div className="w-10 text-center select-none">
                     <span
-                      className={`text-2xl font-extrabold select-none transition-colors ${
-                        qty > 0 ? 'text-primary-600' : 'text-gray-300'
-                      }`}
+                      className={`text-base font-black block leading-none ${qty > 0 ? 'text-emerald-700 font-black' : 'text-gray-300'
+                        }`}
                     >
                       {qty}
                     </span>
-                    <span className="block text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
+                    <span className="text-[9px] text-gray-400 uppercase tracking-tight block mt-0.5 truncate font-medium">
                       {product.unit || 'units'}
                     </span>
                   </div>
 
                   <button
+                    type="button"
                     onClick={() => increment(product._id)}
-                    aria-label={`Increase ${product.name}`}
-                    className="h-12 w-12 rounded-xl bg-primary-600 hover:bg-primary-700 active:scale-95
-                               flex items-center justify-center text-white text-xl font-bold
-                               transition-all shadow-xs"
+                    className="w-9 h-9 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-90 text-white flex items-center justify-center font-bold shadow-2xs transition-all"
+                    title="Increase (+1)"
                   >
-                    <Plus size={18} />
+                    <Plus size={15} />
                   </button>
                 </div>
               </div>
@@ -1376,37 +1412,58 @@ export default function QuickTapPage() {
         </div>
       )}
 
-      {/* ── Sticky Save Sales Bar ───────────────────────────────────────────── */}
-      <div className="sticky bottom-20 md:bottom-4 pt-4 z-20">
-        <div className="bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-gray-200 flex items-center justify-between gap-3">
-          <div className="text-xs">
-            <span className="font-bold text-gray-800 text-sm block">
-              {totalItems} total units selected
-            </span>
-            <span className="text-gray-500">Across {selectedCount} unique products</span>
-          </div>
+      {/* ── Floating Sticky Bottom Save Bar (Visible above bottom nav when items selected) ── */}
+      {totalItems > 0 && (
+        <div className="fixed bottom-[68px] inset-x-0 z-40 px-3 sm:px-6 pointer-events-none">
+          <div
+            className="pointer-events-auto max-w-3xl mx-auto p-3 sm:p-3.5 rounded-2xl flex items-center justify-between gap-3 animate-fade-up"
+            style={{
+              background: 'rgba(255, 255, 255, 0.96)',
+              backdropFilter: 'blur(12px)',
+              border: '1.5px solid #a7f3d0',
+              boxShadow: '0 12px 32px -4px rgba(16, 185, 129, 0.18), 0 4px 12px rgba(0, 0, 0, 0.06)',
+            }}
+          >
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="font-bold text-gray-900 text-sm sm:text-base leading-tight">
+                  {totalItems} item{totalItems !== 1 ? 's' : ''}
+                  {totalAmount > 0 && (
+                    <span className="text-emerald-700 font-extrabold ml-1">
+                      • ₹{totalAmount.toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </span>
+              </div>
+              <span className="text-[11px] text-gray-500 block truncate mt-0.5 font-medium">
+                Across {selectedCount} unique product{selectedCount !== 1 ? 's' : ''}
+              </span>
+            </div>
 
-          <div className="flex items-center gap-2">
-            {totalItems > 0 && (
+            <div className="flex items-center gap-2 shrink-0">
               <button
+                type="button"
                 onClick={() => setCounts({})}
-                className="text-xs text-gray-500 hover:text-red-600 px-3 py-2 rounded-xl hover:bg-gray-100 flex items-center gap-1 font-medium transition-colors"
-                title="Reset counters"
+                className="px-2.5 py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition text-xs font-semibold flex items-center gap-1 border border-gray-200 bg-gray-50/80"
+                title="Reset all counters"
               >
                 <RotateCcw size={13} />
-                Reset
+                <span className="hidden sm:inline">Reset</span>
               </button>
-            )}
-            <button
-              onClick={handleSave}
-              disabled={saveSales.isPending || totalItems === 0}
-              className="btn-primary py-2.5 px-6 text-sm font-bold shadow-md disabled:opacity-50"
-            >
-              {saveSales.isPending ? 'Updating Stock…' : "Save Today's Sales"}
-            </button>
+
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saveSales.isPending}
+                className="btn-primary py-2 px-4 sm:px-5 text-xs sm:text-sm font-bold shadow-md shadow-emerald-600/20 active:scale-95 transition-all"
+              >
+                {saveSales.isPending ? 'Updating…' : 'Save Sales ➔'}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── CSV Import Modal with Live Preview ───────────────────────────────── */}
       {showCsvModal && (
