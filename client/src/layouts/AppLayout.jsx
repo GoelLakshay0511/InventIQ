@@ -1,4 +1,4 @@
-import { NavLink, Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -7,7 +7,6 @@ import {
   Truck,
   Settings,
   LogOut,
-  Zap,
 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import apiClient from '../api/client';
@@ -22,26 +21,23 @@ const navItems = [
   { to: '/settings',        label: 'Settings',     Icon: Settings },
 ];
 
-/** Returns 1–2 initials from a store name for the avatar */
-function getInitials(name = '') {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('');
-}
+/** Shared active-link class factory for desktop sidebar */
+const linkClass = ({ isActive }) =>
+  `flex items-center gap-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+    isActive
+      ? 'bg-primary-50 text-primary-700 font-semibold px-3 border-l-4 border-primary-600'
+      : 'text-gray-500 hover:bg-gray-50/80 hover:text-gray-800 px-3 border-l-4 border-transparent'
+  }`;
 
 export default function AppLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleLogout = async () => {
     try {
       await apiClient.post('/auth/logout');
     } catch {
-      // Ignore server errors — still log out client-side
+      // Ignore server errors — we still log out client-side
     } finally {
       logout();
       navigate('/login', { replace: true });
@@ -49,105 +45,46 @@ export default function AppLayout() {
     }
   };
 
-  const initials = getInitials(user?.storeName || user?.name || 'U');
-
   return (
-    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden" style={{ backgroundColor: '#F0F4F8' }}>
+    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden" style={{ backgroundColor: '#F6F8FA' }}>
 
-      {/* ── Desktop dark sidebar ─────────────────────────────────────── */}
+      {/* ── Desktop sidebar ────────────────────────────────────────── */}
       <aside
-        className="hidden md:flex flex-col w-64 fixed inset-y-0 left-0 z-30"
-        style={{
-          background: 'linear-gradient(180deg, #0f172a 0%, #111c2b 100%)',
-          borderRight: '1px solid rgba(255,255,255,0.06)',
-        }}
+        className="hidden md:flex flex-col w-64 fixed inset-y-0 left-0 z-30 glass"
+        style={{ borderRight: '1px solid rgba(226,232,240,0.7)', backgroundColor: '#ffffff' }}
       >
-        {/* Brand / Logo area */}
+        {/* Logo */}
         <Link
           to="/landing"
-          className="flex items-center gap-3 px-5 py-5 hover:opacity-90 transition-opacity"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
+          className="block px-5 py-5 hover:bg-gray-50/50 transition-colors"
+          style={{ borderBottom: '1px solid rgba(226,232,240,0.6)' }}
         >
-          {/* Logomark: green square with lightning */}
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{
-              background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
-              boxShadow: '0 4px 14px rgba(22,163,74,0.4)',
-            }}
-          >
-            <Zap size={18} color="#fff" fill="#fff" />
-          </div>
-          <div>
-            <h1
-              className="text-base font-bold tracking-tight leading-tight"
-              style={{ color: '#f1f5f9', fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}
-            >
-              InventIQ
-            </h1>
-            {user?.storeName && (
-              <p className="text-[11px] truncate font-medium" style={{ color: '#64748b' }}>
-                {user.storeName}
-              </p>
-            )}
-          </div>
+          <h1 className="text-xl font-bold text-primary-600 tracking-tight">
+            InventIQ 📦
+          </h1>
+          {user?.storeName && (
+            <p className="text-xs text-gray-400 mt-0.5 truncate font-medium">{user.storeName}</p>
+          )}
         </Link>
 
-        {/* Section label */}
-        <div className="px-5 pt-5 pb-2">
-          <span className="section-label">Navigation</span>
-        </div>
-
         {/* Navigation links */}
-        <nav className="flex-1 px-3 pb-4 space-y-0.5 overflow-y-auto scroll-thin">
-          {navItems.map(({ to, label, Icon }) => {
-            const isActive = to === '/dashboard'
-              ? location.pathname === '/dashboard'
-              : location.pathname.startsWith(to);
-            return (
-              <NavLink
-                key={to}
-                to={to}
-                end={to === '/dashboard'}
-                className={`sidebar-nav-link ${isActive ? 'active' : ''}`}
-              >
-                <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} />
-                <span>{label}</span>
-              </NavLink>
-            );
-          })}
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scroll-thin">
+          {navItems.map(({ to, label, Icon }) => (
+            <NavLink key={to} to={to} className={linkClass} end={to === '/dashboard'}>
+              <Icon size={18} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
         </nav>
 
-        {/* User card + Logout pinned to bottom */}
-        <div
-          className="px-3 pb-4 pt-3 space-y-2"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}
-        >
-          {/* User avatar row */}
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)' }}>
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', color: '#fff' }}
-            >
-              {initials}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold truncate" style={{ color: '#e2e8f0' }}>
-                {user?.storeName || user?.name || 'Store'}
-              </p>
-              <p className="text-[10px] truncate" style={{ color: '#475569' }}>
-                {user?.email || 'Admin'}
-              </p>
-            </div>
-          </div>
-
-          {/* Logout */}
+        {/* Logout button pinned to bottom */}
+        <div className="px-3 pb-5 pt-3" style={{ borderTop: '1px solid rgba(226,232,240,0.6)' }}>
           <button
             onClick={handleLogout}
-            className="sidebar-nav-link w-full hover:!bg-red-900/30 hover:!text-red-400 transition-all"
-            style={{ minHeight: '40px' }}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150"
+            style={{ minHeight: '44px' }}
           >
-            <LogOut size={16} strokeWidth={1.8} />
+            <LogOut size={18} />
             <span>Logout</span>
           </button>
         </div>
@@ -158,31 +95,15 @@ export default function AppLayout() {
 
         {/* Mobile top bar */}
         <header
-          className="md:hidden sticky top-0 z-20 flex items-center justify-between px-4 py-2.5"
-          style={{
-            background: 'rgba(255,255,255,0.92)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderBottom: '1px solid rgba(226,232,240,0.7)',
-            boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
-          }}
+          className="md:hidden sticky top-0 z-20 glass px-4 py-2.5 flex items-center justify-between"
+          style={{ borderBottom: '1px solid rgba(226,232,240,0.7)', backgroundColor: 'rgba(255,255,255,0.95)' }}
         >
-          <Link to="/landing" className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', boxShadow: '0 2px 8px rgba(22,163,74,0.35)' }}
-            >
-              <Zap size={16} color="#fff" fill="#fff" />
-            </div>
+          <Link to="/landing" className="flex items-center gap-2">
+            <span className="text-xl">📦</span>
             <div>
-              <h1
-                className="text-sm font-bold leading-tight"
-                style={{ color: '#0f172a', fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}
-              >
-                InventIQ
-              </h1>
+              <h1 className="text-base font-bold text-primary-600 leading-tight">InventIQ</h1>
               {user?.storeName && (
-                <span className="text-[10px] text-gray-400 block truncate max-w-[120px] font-medium">
+                <span className="text-[11px] text-gray-500 block truncate max-w-[130px]">
                   {user.storeName}
                 </span>
               )}
@@ -194,16 +115,17 @@ export default function AppLayout() {
               to="/settings"
               className={({ isActive }) =>
                 `p-2 rounded-lg transition-colors ${
-                  isActive ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                  isActive ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-100'
                 }`
               }
               aria-label="Settings"
             >
-              <Settings size={19} />
+              <Settings size={20} />
             </NavLink>
+
             <button
               onClick={handleLogout}
-              className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+              className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
               aria-label="Logout"
             >
               <LogOut size={19} />
@@ -219,7 +141,7 @@ export default function AppLayout() {
 
       {/* ── Mobile bottom nav (Fixed & elevated above cards) ────────── */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 flex items-center justify-around px-1 pt-1.5 pb-2.5 sm:pb-3"
+        className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-md flex items-center justify-around px-1 pt-1.5 pb-2.5 sm:pb-3 border-t border-gray-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
         style={{
           position: 'fixed',
           bottom: 0,
@@ -227,11 +149,6 @@ export default function AppLayout() {
           right: 0,
           width: '100%',
           zIndex: 50,
-          background: 'rgba(255,255,255,0.95)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderTop: '1px solid rgba(226,232,240,0.8)',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
           paddingBottom: 'max(10px, env(safe-area-inset-bottom, 10px))',
         }}
       >
@@ -248,13 +165,10 @@ export default function AppLayout() {
           >
             {({ isActive }) => (
               <>
-                <div
-                  className="p-1 rounded-xl transition-all duration-150"
-                  style={isActive ? { background: '#dcfce7' } : {}}
-                >
-                  <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className="shrink-0" />
+                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-primary-50 text-primary-600' : ''}`}>
+                  <Icon size={19} className="shrink-0" />
                 </div>
-                <span className={`text-[10px] leading-tight mt-0.5 tracking-tight text-center truncate max-w-full ${isActive ? 'font-semibold' : ''}`}>
+                <span className="text-[10px] leading-tight mt-0.5 tracking-tight text-center truncate max-w-full">
                   {label}
                 </span>
               </>
