@@ -105,9 +105,15 @@ async function generateForecast(userId) {
     }
     forecastedDemand7d = Math.ceil(forecastedDemand7d);
 
-    // ── Safety stock: absorbs demand variability during lead time ────────────
+    // ── Dynamic Lead Time: Actual turnaround vs promised deliveryDays ───────
+    const promisedLeadTime = product.distributorId?.deliveryDays || 3;
+    const actualLeadTime = product.distributorId?.effectiveLeadTime || promisedLeadTime;
+    const leadTimeDays = actualLeadTime;
+    const delayBufferDays = Math.max(0, Number((actualLeadTime - promisedLeadTime).toFixed(1)));
+    const onTimeRate = product.distributorId?.onTimeRate ?? 100;
+
+    // ── Safety stock: absorbs demand variability & vendor delivery delays ────
     const sigma = stdDev(recent7);
-    const leadTimeDays = product.distributorId?.deliveryDays || 3;
     const safetyStock = Math.ceil(Z_SCORE_95 * sigma * Math.sqrt(leadTimeDays));
 
     // ── Reorder point: average consumption during lead time + safety buffer ──
@@ -136,6 +142,10 @@ async function generateForecast(userId) {
       productName: product.name,
       distributorId: product.distributorId?._id || null,
       distributorName: product.distributorId?.name || 'Unknown',
+      promisedLeadTime,
+      effectiveLeadTime: actualLeadTime,
+      delayBufferDays,
+      distributorOnTimeRate: onTimeRate,
       currentStock: product.currentStock,
       avgDailySales: parseFloat(avgDailySales.toFixed(2)),
       forecastedDemand7d,

@@ -25,5 +25,6 @@ router.post('/batch', salesController.batchLog);
 router.get('/history', salesController.getHistory);
 router.get('/daily-summary', salesController.getDailySummary);
 router.post('/import/csv', upload.single('file'), salesController.importCSV);
+router.post('/refresh-demo', salesController.refreshDemoSales);
 
 module.exports = router;

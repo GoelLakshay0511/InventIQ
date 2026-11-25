@@ -91,7 +91,7 @@ async function getWhatsAppLinks(req, res, next) {
     if (!suggestion) return sendError(res, 'No active suggestions found. Please generate a forecast first.', 404);
 
     const links = await reorderService.generateWhatsAppMessages(suggestion);
-    
+
     // If a specific distributor was requested, find matching link
     let targetLink = null;
     if (distributorId) {
@@ -122,7 +122,7 @@ async function getWhatsAppLinks(req, res, next) {
  */
 async function markOrdered(req, res, next) {
   try {
-    const { suggestionId } = req.body;
+    const { suggestionId, distributorId } = req.body;
     let suggestion = null;
     if (suggestionId) {
       suggestion = await ReorderSuggestion.findOne({ _id: suggestionId, userId: req.user.id });
@@ -132,10 +132,87 @@ async function markOrdered(req, res, next) {
 
     if (suggestion) {
       suggestion.status = 'ordered';
+      if (distributorId) {
+        const dKey = distributorId.toString();
+        if (!suggestion.distributorOrders) suggestion.distributorOrders = new Map();
+        const existing = suggestion.distributorOrders.get(dKey) || {};
+        suggestion.distributorOrders.set(dKey, {
+          status: 'ordered',
+          orderedAt: existing.orderedAt || new Date(),
+          deliveredAt: null,
+          actualDays: null,
+        });
+      }
       await suggestion.save();
     }
 
     return sendSuccess(res, { suggestion }, 'Marked as ordered');
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/reorder/mark-delivered
+ * Records delivery arrival, closes the order loop, and updates the distributor's reliability scorecard.
+ */
+async function markDelivered(req, res, next) {
+  try {
+    const { distributorId, suggestionId, daysTaken, note } = req.body;
+    if (!distributorId) return sendError(res, 'distributorId is required', 400);
+
+    const Distributor = require('../distributors/distributor.model');
+    const distributor = await Distributor.findOne({ _id: distributorId, userId: req.user.id, isActive: true });
+    if (!distributor) return sendError(res, 'Distributor not found', 404);
+
+    let calculatedDays = Number(daysTaken);
+    let orderDate = null;
+
+    let suggestion = null;
+    if (suggestionId) {
+      suggestion = await ReorderSuggestion.findOne({ _id: suggestionId, userId: req.user.id });
+    } else {
+      suggestion = await reorderService.getLatestSuggestions(req.user.id);
+    }
+
+    const orderInfo = suggestion?.distributorOrders?.get(distributorId.toString());
+
+    if (isNaN(calculatedDays) || calculatedDays <= 0) {
+      if (orderInfo?.orderedAt) {
+        orderDate = new Date(orderInfo.orderedAt);
+        const diff = (Date.now() - orderDate.getTime()) / (1000 * 60 * 60 * 24);
+        calculatedDays = Math.max(0.5, Number(diff.toFixed(1)));
+      } else {
+        calculatedDays = distributor.effectiveLeadTime || distributor.deliveryDays || 2;
+      }
+    }
+
+    if (orderInfo && suggestion) {
+      orderInfo.status = 'delivered';
+      orderInfo.deliveredAt = new Date();
+      orderInfo.actualDays = calculatedDays;
+      await suggestion.save();
+    }
+
+    distributor.recordDelivery(calculatedDays, note || 'Delivery confirmed via Reorder tracking', orderDate);
+    await distributor.save();
+
+    // Trigger updated forecast in background
+    try {
+      const updatedForecast = await generateForecast(req.user.id);
+      if (updatedForecast && updatedForecast.length > 0 && suggestion) {
+        suggestion.items = updatedForecast;
+        await suggestion.save();
+      }
+    } catch {
+      // non-blocking
+    }
+
+    return sendSuccess(
+      res,
+      { distributor, turnaroundDays: calculatedDays },
+      `Stock delivered! ${distributor.name} scorecard updated: ${distributor.effectiveLeadTime}d turnaround (${distributor.onTimeRate}% on-time).`
+    );
   } catch (err) {
     next(err);
   }
@@ -213,5 +290,6 @@ module.exports = {
   getWhatsAppLinks,
   updateStatus,
   markOrdered,
+  markDelivered,
   fulfillOrder,
 };

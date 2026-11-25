@@ -17,6 +17,10 @@ const reorderItemSchema = new mongoose.Schema(
     packSize: { type: Number, default: 1 },
     unit: { type: String, default: 'piece' },
     distributorMov: { type: Number, default: 0 },
+    promisedLeadTime: { type: Number, default: 2 },
+    effectiveLeadTime: { type: Number, default: 2 },
+    delayBufferDays: { type: Number, default: 0 },
+    distributorOnTimeRate: { type: Number, default: 100 },
     urgency: {
       type: String,
       enum: ['critical', 'high', 'medium', 'low'],
@@ -40,8 +44,22 @@ const reorderSuggestionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'sent', 'ordered'],
+      enum: ['pending', 'sent', 'ordered', 'delivered'],
       default: 'pending',
+    },
+    // Map of distributorId -> { status: 'pending'|'ordered'|'delivered', orderedAt: Date, deliveredAt: Date }
+    distributorOrders: {
+      type: Map,
+      of: new mongoose.Schema(
+        {
+          status: { type: String, enum: ['pending', 'ordered', 'delivered'], default: 'pending' },
+          orderedAt: { type: Date, default: null },
+          deliveredAt: { type: Date, default: null },
+          actualDays: { type: Number, default: null },
+        },
+        { _id: false }
+      ),
+      default: {},
     },
     items: [reorderItemSchema],
     // Map of distributorId (string) → WhatsApp message/link info

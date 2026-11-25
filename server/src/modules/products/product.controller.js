@@ -245,12 +245,36 @@ async function confirmRestock(req, res, next) {
       if (p) updatedProducts.push(p);
     }
 
+    // Auto-update distributor delivery scorecard if supplier matches
+    let distributorUpdated = null;
+    if (supplierName) {
+      try {
+        const Distributor = require('../distributors/distributor.model');
+        const escaped = supplierName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const distributor = await Distributor.findOne({
+          userId: req.user.id,
+          isActive: true,
+          name: { $regex: new RegExp(escaped, 'i') },
+        });
+        if (distributor) {
+          const days = req.body.turnaroundDays ? Number(req.body.turnaroundDays) : (distributor.deliveryDays || 2);
+          distributor.recordDelivery(days, `Invoice OCR Restock: ${invoiceNumber || 'Direct'}`);
+          await distributor.save();
+          distributorUpdated = distributor;
+        }
+      } catch {
+        // non-blocking
+      }
+    }
+
+    const distNote = distributorUpdated ? ` · Scorecard updated for ${distributorUpdated.name} (${distributorUpdated.effectiveLeadTime}d turnaround)` : '';
     return sendSuccess(res, {
       restockedCount: updatedProducts.length,
       supplierName: supplierName || 'Wholesale Supplier',
       invoiceNumber: invoiceNumber || 'RESTOCK-' + Date.now(),
       products: updatedProducts,
-    }, `Successfully restocked ${updatedProducts.length} products into inventory!`);
+      distributor: distributorUpdated,
+    }, `Successfully restocked ${updatedProducts.length} products into inventory!${distNote}`);
   } catch (err) {
     next(err);
   }

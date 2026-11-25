@@ -131,7 +131,24 @@ function ReorderAlertCard({ item, productMap }) {
 export default function DashboardPage() {
   const qc = useQueryClient();
   const [generatingForecast, setGeneratingForecast] = useState(false);
+  const [refreshingSales, setRefreshingSales] = useState(false);
   const [showDeadStockModal, setShowDeadStockModal] = useState(false);
+
+  const handleRefreshSales = async () => {
+    setRefreshingSales(true);
+    try {
+      await apiClient.post('/sales/refresh-demo');
+      qc.invalidateQueries({ queryKey: ['dead-stock'] });
+      qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['reorder-suggestions'] });
+      qc.invalidateQueries({ queryKey: ['sales-daily'] });
+      toast.success('30 days of sales history refreshed up to today! 🎉');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to refresh demo sales');
+    } finally {
+      setRefreshingSales(false);
+    }
+  };
 
   /* ── Close modal on Escape key ─────────────────────────────────────────── */
   useEffect(() => {
@@ -596,7 +613,17 @@ export default function DashboardPage() {
             </div>
 
             {/* Modal footer */}
-            <div className="px-6 py-3 flex justify-end" style={{ borderTop: '1px solid #f1f5f9', background: '#fafbfc', borderRadius: '0 0 20px 20px' }}>
+            <div className="px-4 sm:px-6 py-3 flex items-center justify-between gap-3 flex-wrap" style={{ borderTop: '1px solid #f1f5f9', background: '#fafbfc', borderRadius: '0 0 20px 20px' }}>
+              <button
+                type="button"
+                onClick={handleRefreshSales}
+                disabled={refreshingSales}
+                className="text-xs font-semibold px-3 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 flex items-center gap-1.5 transition-all disabled:opacity-60"
+                title="Generates 30 days of realistic sales up to today so active products leave dead stock"
+              >
+                <RefreshCw size={13} className={refreshingSales ? 'animate-spin text-primary-600' : 'text-gray-400'} />
+                {refreshingSales ? 'Syncing to Today…' : '🔄 Sync Sales to Today (Dev)'}
+              </button>
               <button onClick={() => setShowDeadStockModal(false)} className="btn-primary text-xs py-2 px-4">
                 Close &amp; Return
               </button>
