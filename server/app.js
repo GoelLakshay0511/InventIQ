@@ -16,6 +16,9 @@ const errorHandler = require('./src/middleware/error.middleware');
 
 const app = express();
 
+// Trust Render / reverse-proxy X-Forwarded-For header for express-rate-limit
+app.set('trust proxy', 1);
+
 // ── Security & Utility Middleware ──────────────────────────────────────────────
 app.use(
   helmet({
